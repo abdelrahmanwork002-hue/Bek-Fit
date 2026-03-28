@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
 const logo = '/Bek Fit Logo.png';;
 
 export default function Login() {
@@ -22,11 +23,27 @@ export default function Login() {
 
     try {
       await login(email, password);
-      router.push('/onboarding');
+      router.push('/home');
     } catch (err) {
       setError('Invalid email or password');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleOAuthLogin = async (provider: 'google' | 'facebook') => {
+    const supabase = createClient();
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+      if (error) throw error;
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || `Failed to login with ${provider}`);
     }
   };
 
@@ -120,10 +137,18 @@ export default function Login() {
 
           {/* Social Login */}
           <div className="grid grid-cols-2 gap-4">
-            <button className="px-4 py-3 bg-[#1a1a1a] border border-white/10 rounded-lg hover:bg-white/5 transition-colors">
+            <button 
+              onClick={() => handleOAuthLogin('google')}
+              type="button"
+              className="px-4 py-3 bg-[#1a1a1a] border border-white/10 rounded-lg hover:bg-white/5 transition-colors"
+            >
               <span className="text-sm">Google</span>
             </button>
-            <button className="px-4 py-3 bg-[#1a1a1a] border border-white/10 rounded-lg hover:bg-white/5 transition-colors">
+            <button 
+              onClick={() => handleOAuthLogin('facebook')}
+              type="button"
+              className="px-4 py-3 bg-[#1a1a1a] border border-white/10 rounded-lg hover:bg-white/5 transition-colors"
+            >
               <span className="text-sm">Facebook</span>
             </button>
           </div>

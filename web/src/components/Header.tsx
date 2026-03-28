@@ -1,7 +1,8 @@
 'use client';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Menu, X, Globe, Sun, Moon, LogOut } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTheme } from 'next-themes';
 import { useAuth } from '@/context/AuthContext';
 const logo = '/Bek Fit Logo.png';;
@@ -9,11 +10,16 @@ const logo = '/Bek Fit Logo.png';;
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [language, setLanguage] = useState<'en' | 'ar'>('en');
-  const location = useLocation();
+  const pathname = usePathname();
   const { theme, setTheme } = useTheme();
   const { isAuthenticated, logout } = useAuth();
+  const [mounted, setMounted] = useState(false);
 
-  const isLanding = location.pathname === '/';
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isLanding = pathname === '/';
 
   const navigation = isLanding
     ? [
@@ -82,7 +88,7 @@ export function Header() {
               className="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:text-[#6dccc4] hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
               aria-label="Toggle theme"
             >
-              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              {!mounted ? <Moon className="w-5 h-5" /> : theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
             
             <button

@@ -30,7 +30,7 @@ export function NutritionAssessment({ data, onNext }: NutritionAssessmentProps) 
     if (formData.restrictions.includes(restriction)) {
       setFormData({
         ...formData,
-        restrictions: formData.restrictions.filter((r) => r !== restriction),
+        restrictions: formData.restrictions.filter((r: string) => r !== restriction),
       });
     } else {
       setFormData({
