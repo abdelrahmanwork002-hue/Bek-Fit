@@ -44,7 +44,7 @@ export default function OnboardingFlow() {
     } else {
       // Onboarding complete
       completeOnboarding();
-      router.push('/payment');
+      router.push('/home');
     }
   };
 
