@@ -1,167 +1,172 @@
-'use client'
+'use client';
+import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
+import { Mail, MapPin, Phone, Instagram, Facebook, MessageCircle } from 'lucide-react';
 
-import { useState } from 'react'
-import { Header } from '@/components/Header'
-import { Footer } from '@/components/Footer'
-import { Mail, MessageCircle, Globe, Send, Loader2, Sparkles, CheckCircle2 } from 'lucide-react'
-
-export default function ContactPage() {
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isSent, setIsSent] = useState(false)
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false)
-      setIsSent(true)
-    }, 1500)
-  }
-
+export default function Contact() {
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
+    <div className="min-h-screen bg-[#1a1a1a] text-white">
       <Header />
 
-      <main className="flex-1 pt-32 pb-16 px-4 bg-muted/5">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row gap-16 animate-in fade-in slide-in-from-top-8 duration-1000">
-            
-            {/* Left Column: Info */}
-            <div className="md:w-1/2 space-y-12">
-               <div>
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest mb-6 border border-primary/20">
-                     Support Protocol v1.0
-                  </div>
-                  <h1 className="text-6xl font-black mb-8 tracking-tight italic">Reach Out</h1>
-                  <p className="text-2xl text-muted-foreground font-medium leading-relaxed italic border-l-4 border-primary pl-10 max-w-lg">
-                    Have an inquiry about your <span className="text-foreground font-bold">transformation logic</span>? Our diagnostic team is on standby.
-                  </p>
-               </div>
+      <div className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="mb-12">
+            <h1 className="text-5xl mb-4">Get in Touch</h1>
+            <p className="text-xl text-gray-400">
+              Have questions? We'd love to hear from you.
+            </p>
+          </div>
 
-               <div className="space-y-6">
-                  <div className="p-8 bg-card border border-border rounded-[2.5rem] shadow-xl relative overflow-hidden group">
-                     <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -z-10 group-hover:scale-110 transition-transform duration-1000" />
-                     <div className="flex items-center gap-6">
-                        <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
-                           <Mail className="w-6 h-6 text-primary" />
-                        </div>
-                        <div>
-                           <p className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-1">Direct Uplink</p>
-                           <p className="text-xl font-black italic">Support@BekFit.com</p>
-                        </div>
-                     </div>
-                  </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            {/* Contact Form */}
+            <div className="bg-[#0f0f0f] rounded-2xl border border-white/10 p-8">
+              <h2 className="text-2xl mb-6">Send us a Message</h2>
+              
+              <form className="space-y-6">
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">Name</label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-3 bg-[#1a1a1a] border border-white/10 rounded-lg focus:border-[#6dccc4] focus:outline-none"
+                    placeholder="Your name"
+                  />
+                </div>
 
-                  <div className="p-8 bg-card border border-border rounded-[2.5rem] shadow-xl relative overflow-hidden group">
-                     <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -z-10 group-hover:scale-110 transition-transform duration-1000" />
-                     <div className="flex items-center gap-6">
-                        <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
-                           <MessageCircle className="w-6 h-6 text-primary" />
-                        </div>
-                        <div>
-                           <p className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-1">Live Comms</p>
-                           <p className="text-xl font-black italic">@BekFitOfficial</p>
-                        </div>
-                     </div>
-                  </div>
-               </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">Email</label>
+                  <input
+                    type="email"
+                    className="w-full px-4 py-3 bg-[#1a1a1a] border border-white/10 rounded-lg focus:border-[#6dccc4] focus:outline-none"
+                    placeholder="your@email.com"
+                  />
+                </div>
 
-               <div className="p-10 bg-primary rounded-[2.5rem] text-primary-foreground text-center shadow-xl shadow-primary/20 relative overflow-hidden group">
-                  <div className="absolute -top-10 -left-10 w-48 h-48 bg-white/10 rounded-full blur-[80px] -z-10 group-hover:scale-110 transition-transform duration-1000" />
-                  <Sparkles className="w-10 h-10 mx-auto mb-6 text-white" />
-                  <h3 className="text-2xl font-black mb-4 italic">Collaborative Inquiry?</h3>
-                  <p className="text-sm font-medium opacity-80 leading-relaxed mb-8">We are always open to performance-based partnerships and movement integration initiatives.</p>
-                  <button className="w-full py-4 bg-background text-foreground font-black uppercase tracking-widest text-xs rounded-2xl hover:opacity-95 transition-all shadow-xl shadow-black/10">
-                     Corporate Deck
-                  </button>
-               </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">Subject</label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-3 bg-[#1a1a1a] border border-white/10 rounded-lg focus:border-[#6dccc4] focus:outline-none"
+                    placeholder="How can we help?"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">Message</label>
+                  <textarea
+                    className="w-full px-4 py-3 bg-[#1a1a1a] border border-white/10 rounded-lg focus:border-[#6dccc4] focus:outline-none"
+                    rows={6}
+                    placeholder="Your message..."
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full px-6 py-3 bg-[#6dccc4] text-[#1a1a1a] rounded-lg hover:bg-[#5fbbb3] transition-colors"
+                >
+                  Send Message
+                </button>
+              </form>
             </div>
 
-            {/* Right Column: Form */}
-            <div className="md:w-1/2">
-               <div className="bg-card border border-border rounded-[3rem] p-12 shadow-2xl relative overflow-hidden">
-                  <div className="absolute top-0 right-10 w-64 h-64 bg-primary/5 rounded-full blur-[100px] -z-10" />
-                  
-                  {isSent ? (
-                     <div className="text-center py-20 flex flex-col items-center">
-                        <div className="w-20 h-20 rounded-3xl bg-emerald-500/10 flex items-center justify-center mb-8 border border-emerald-500/20">
-                           <CheckCircle2 className="w-10 h-10 text-emerald-500" />
-                        </div>
-                        <h2 className="text-4xl font-black mb-4 italic">Message Transmitted</h2>
-                        <p className="text-muted-foreground font-medium text-lg italic opacity-80 mb-12">Our team will respond within the next 24-hour diagnostic cycle.</p>
-                        <button 
-                           onClick={() => setIsSent(false)}
-                           className="px-10 py-4 border-2 border-primary text-primary font-black uppercase tracking-widest text-xs rounded-2xl hover:bg-primary hover:text-primary-foreground transition-all"
-                        >
-                           Send New Transmission
-                        </button>
-                     </div>
-                  ) : (
-                    <form onSubmit={handleSubmit} className="space-y-8">
-                       <h2 className="text-sm font-black uppercase tracking-[0.2em] text-primary mb-10 border-b border-border/50 pb-6 ml-1">Transmission Terminal</h2>
+            {/* Contact Information */}
+            <div className="space-y-8">
+              {/* Contact Details */}
+              <div className="bg-[#0f0f0f] rounded-2xl border border-white/10 p-8">
+                <h2 className="text-2xl mb-6">Contact Information</h2>
+                
+                <div className="space-y-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-full bg-[#6dccc4]/20 flex items-center justify-center flex-shrink-0">
+                      <Mail className="w-5 h-5 text-[#6dccc4]" />
+                    </div>
+                    <div>
+                      <p className="text-gray-400 mb-1">Email</p>
+                      <a href="mailto:info@bekfit.com" className="text-lg hover:text-[#6dccc4] transition-colors">
+                        info@bekfit.com
+                      </a>
+                    </div>
+                  </div>
 
-                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                          <div className="space-y-3">
-                             <label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Identity</label>
-                             <input
-                                required
-                                type="text"
-                                className="w-full bg-muted/30 border border-border rounded-2xl py-5 px-6 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-medium text-lg"
-                                placeholder="Full Name"
-                             />
-                          </div>
-                          <div className="space-y-3">
-                             <label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Contact Node</label>
-                             <input
-                                required
-                                type="email"
-                                className="w-full bg-muted/30 border border-border rounded-2xl py-5 px-6 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-medium text-lg"
-                                placeholder="Email Address"
-                             />
-                          </div>
-                       </div>
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-full bg-[#6dccc4]/20 flex items-center justify-center flex-shrink-0">
+                      <Phone className="w-5 h-5 text-[#6dccc4]" />
+                    </div>
+                    <div>
+                      <p className="text-gray-400 mb-1">Phone</p>
+                      <a href="tel:+201012345678" className="text-lg hover:text-[#6dccc4] transition-colors">
+                        +20 101 234 5678
+                      </a>
+                    </div>
+                  </div>
 
-                       <div className="space-y-3">
-                          <label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Subject Protocol</label>
-                          <select className="w-full bg-muted/30 border border-border rounded-2xl py-5 px-6 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-black text-lg appearance-none">
-                             <option>General Support</option>
-                             <option>Billing & Payment Query</option>
-                             <option>Custom Movement Request</option>
-                             <option>Technical Diagnostic</option>
-                          </select>
-                       </div>
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-full bg-[#6dccc4]/20 flex items-center justify-center flex-shrink-0">
+                      <MapPin className="w-5 h-5 text-[#6dccc4]" />
+                    </div>
+                    <div>
+                      <p className="text-gray-400 mb-1">Location</p>
+                      <p className="text-lg">Cairo, Egypt</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-                       <div className="space-y-3">
-                          <label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Transmission Payload</label>
-                          <textarea
-                             required
-                             rows={6}
-                             className="w-full bg-muted/30 border border-border rounded-3xl py-6 px-8 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-medium text-lg resize-none italic"
-                             placeholder="How can we assist in your evolution?"
-                          />
-                       </div>
+              {/* Social Media */}
+              <div className="bg-[#0f0f0f] rounded-2xl border border-white/10 p-8">
+                <h2 className="text-2xl mb-6">Follow Us</h2>
+                
+                <div className="grid grid-cols-3 gap-4">
+                  <a
+                    href="#"
+                    className="aspect-square rounded-lg bg-[#1a1a1a] border border-white/10 flex flex-col items-center justify-center gap-2 hover:border-[#6dccc4] hover:bg-[#6dccc4]/10 transition-colors"
+                  >
+                    <Instagram className="w-6 h-6 text-[#6dccc4]" />
+                    <span className="text-sm">Instagram</span>
+                  </a>
 
-                       <button
-                          type="submit"
-                          disabled={isSubmitting}
-                          className="w-full py-6 bg-primary text-primary-foreground rounded-2xl font-black text-xl hover:opacity-95 transition-all active:scale-[0.98] shadow-xl shadow-primary/20 flex items-center justify-center gap-4 disabled:opacity-50 group mt-10"
-                       >
-                          {isSubmitting ? (
-                             <><Loader2 className="w-6 h-6 animate-spin" /> Transmitting...</>
-                          ) : (
-                             <>Send Transmission <Send className="w-6 h-6 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" /></>
-                          )}
-                       </button>
-                    </form>
-                  )}
-               </div>
+                  <a
+                    href="#"
+                    className="aspect-square rounded-lg bg-[#1a1a1a] border border-white/10 flex flex-col items-center justify-center gap-2 hover:border-[#6dccc4] hover:bg-[#6dccc4]/10 transition-colors"
+                  >
+                    <Facebook className="w-6 h-6 text-[#6dccc4]" />
+                    <span className="text-sm">Facebook</span>
+                  </a>
+
+                  <a
+                    href="#"
+                    className="aspect-square rounded-lg bg-[#1a1a1a] border border-white/10 flex flex-col items-center justify-center gap-2 hover:border-[#6dccc4] hover:bg-[#6dccc4]/10 transition-colors"
+                  >
+                    <MessageCircle className="w-6 h-6 text-[#6dccc4]" />
+                    <span className="text-sm">WhatsApp</span>
+                  </a>
+                </div>
+              </div>
+
+              {/* Business Hours */}
+              <div className="bg-[#0f0f0f] rounded-2xl border border-white/10 p-8">
+                <h2 className="text-2xl mb-6">Support Hours</h2>
+                
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Monday - Friday</span>
+                    <span>9:00 AM - 6:00 PM</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Saturday</span>
+                    <span>10:00 AM - 4:00 PM</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Sunday</span>
+                    <span>Closed</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </main>
+      </div>
 
       <Footer />
     </div>
-  )
+  );
 }

@@ -1,201 +1,197 @@
-'use client'
+'use client';
+import { useState } from 'react';
+import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
+import { User, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+const logo = '/Bek Fit Logo.png';;
 
-import { useState } from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
-import { Header } from '@/components/Header'
-import { Footer } from '@/components/Footer'
-import { Mail, Lock, Chrome, Facebook, ArrowRight, Loader2, User, Sparkles } from 'lucide-react'
+export default function Signup() {
+  const router = useRouter();
+  const { signup } = useAuth();
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-export default function SignupPage() {
-  const [fullName, setFullName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
-  const router = useRouter()
-  const supabase = createClient()
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
 
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError(null)
-
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-        },
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding`,
-      },
-    })
-
-    if (error) {
-      setError(error.message)
-      setIsLoading(false)
-    } else {
-      setSuccess('Transformation initiated! Please check your email for a confirmation link.')
-      setIsLoading(false)
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
     }
-  }
 
-  const handleSocialLogin = async (provider: 'google' | 'facebook') => {
-    setIsLoading(true)
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider,
-      options: {
-         redirectTo: `${window.location.origin}/auth/callback?next=/onboarding`,
-      }
-    })
-    if (error) {
-      setError(error.message)
-      setIsLoading(false)
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
     }
-  }
+
+    setIsLoading(true);
+
+    try {
+      await signup(name, email, password);
+      router.push('/onboarding');
+    } catch (err) {
+      setError('Failed to create account. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
-      <Header />
-      
-      <main className="flex-1 flex items-center justify-center pt-32 pb-16 px-4">
-        <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-8 duration-700">
-          <div className="bg-card border border-border rounded-[2.5rem] p-10 shadow-2xl relative overflow-hidden">
-            {/* Design Accents */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl -z-10 -translate-y-1/2 translate-x-1/2" />
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-primary/5 rounded-full blur-2xl -z-10 translate-y-1/2 -translate-x-1/2" />
-            
-            <div className="text-center mb-10">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-black uppercase tracking-widest mb-4">
-                 <Sparkles className="w-4 h-4" />
-                 Start Your Journey
-              </div>
-              <h1 className="text-4xl font-black mb-3 tracking-tight">Create Account</h1>
-              <p className="text-muted-foreground text-lg">Join the elite fitness community.</p>
-            </div>
+    <div className="min-h-screen bg-[#1a1a1a] dark:bg-[#1a1a1a] text-white flex items-center justify-center px-4 py-12">
+      <div className="w-full max-w-md">
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <img src={logo} alt="BekFit Logo" className="h-12 w-auto mx-auto mb-6" />
+          <h1 className="text-3xl mb-2">Create Your Account</h1>
+          <p className="text-gray-400">Start your wellness transformation today</p>
+        </div>
 
+        {/* Signup Form */}
+        <div className="bg-[#0f0f0f] rounded-2xl border border-white/10 p-8">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-              <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-2xl text-destructive text-sm font-bold animate-in shake duration-300">
+              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-red-500 text-sm">
                 {error}
               </div>
             )}
 
-            {success && (
-              <div className="mb-6 p-6 bg-primary/10 border border-primary/20 rounded-2xl text-foreground text-sm font-medium animate-in zoom-in-95 duration-500">
-                <div className="flex gap-4">
-                   <div className="w-10 h-10 rounded-full bg-primary/20 flex-shrink-0 flex items-center justify-center">
-                      <Mail className="w-5 h-5 text-primary" />
-                   </div>
-                   <p className="leading-relaxed">
-                      {success}
-                   </p>
-                </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-2">Full Name</label>
+              <div className="relative">
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full pl-12 pr-4 py-3 bg-[#1a1a1a] border border-white/10 rounded-lg focus:border-[#6dccc4] focus:outline-none"
+                  placeholder="John Doe"
+                  required
+                />
               </div>
-            )}
+            </div>
 
-            {!success && (
-              <>
-                <form onSubmit={handleSignup} className="space-y-6">
-                  <div className="space-y-2">
-                    <label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Full Name</label>
-                    <div className="relative group">
-                      <div className="absolute inset-y-0 left-4 flex items-center text-muted-foreground group-focus-within:text-primary transition-colors">
-                        <User className="w-5 h-5" />
-                      </div>
-                      <input
-                        type="text"
-                        value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
-                        required
-                        className="w-full bg-muted/30 border border-border rounded-2xl py-4 pl-12 pr-4 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-foreground text-lg"
-                        placeholder="John Doe"
-                      />
-                    </div>
-                  </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-2">Email</label>
+              <div className="relative">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full pl-12 pr-4 py-3 bg-[#1a1a1a] border border-white/10 rounded-lg focus:border-[#6dccc4] focus:outline-none"
+                  placeholder="your@email.com"
+                  required
+                />
+              </div>
+            </div>
 
-                  <div className="space-y-2">
-                    <label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Email Address</label>
-                    <div className="relative group">
-                      <div className="absolute inset-y-0 left-4 flex items-center text-muted-foreground group-focus-within:text-primary transition-colors">
-                        <Mail className="w-5 h-5" />
-                      </div>
-                      <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        className="w-full bg-muted/30 border border-border rounded-2xl py-4 pl-12 pr-4 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-foreground text-lg"
-                        placeholder="name@example.com"
-                      />
-                    </div>
-                  </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-2">Password</label>
+              <div className="relative">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-12 pr-12 py-3 bg-[#1a1a1a] border border-white/10 rounded-lg focus:border-[#6dccc4] focus:outline-none"
+                  placeholder="••••••••"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
 
-                  <div className="space-y-2">
-                    <label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Password</label>
-                    <div className="relative group">
-                      <div className="absolute inset-y-0 left-4 flex items-center text-muted-foreground group-focus-within:text-primary transition-colors">
-                        <Lock className="w-5 h-5" />
-                      </div>
-                      <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        className="w-full bg-muted/30 border border-border rounded-2xl py-4 pl-12 pr-4 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-foreground text-lg"
-                        placeholder="••••••••"
-                      />
-                    </div>
-                  </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-2">Confirm Password</label>
+              <div className="relative">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full pl-12 pr-4 py-3 bg-[#1a1a1a] border border-white/10 rounded-lg focus:border-[#6dccc4] focus:outline-none"
+                  placeholder="••••••••"
+                  required
+                />
+              </div>
+            </div>
 
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full py-5 bg-primary text-primary-foreground rounded-2xl font-black text-xl hover:opacity-95 transition-all active:scale-[0.98] shadow-xl shadow-primary/20 flex items-center justify-center gap-3 disabled:opacity-50"
-                  >
-                    {isLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Get Started'}
-                    {!isLoading && <ArrowRight className="w-6 h-6" />}
-                  </button>
-                </form>
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                className="mt-1 w-4 h-4 rounded border-white/20 bg-[#0f0f0f] text-[#6dccc4] focus:ring-[#6dccc4]"
+                required
+              />
+              <span className="text-sm text-gray-400">
+                I agree to the{' '}
+                <a href="#" className="text-[#6dccc4] hover:underline">
+                  Terms of Service
+                </a>{' '}
+                and{' '}
+                <a href="#" className="text-[#6dccc4] hover:underline">
+                  Privacy Policy
+                </a>
+              </span>
+            </label>
 
-                <div className="my-10 flex items-center gap-4 text-muted-foreground">
-                   <div className="h-px bg-border flex-1" />
-                   <span className="text-[10px] font-black uppercase tracking-widest">Or Register With</span>
-                   <div className="h-px bg-border flex-1" />
-                </div>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full px-6 py-3 bg-[#6dccc4] text-[#1a1a1a] rounded-lg hover:bg-[#5fbbb3] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? 'Creating account...' : 'Create Account'}
+            </button>
+          </form>
 
-                <div className="grid grid-cols-2 gap-4">
-                   <button
-                     onClick={() => handleSocialLogin('google')}
-                     className="flex items-center justify-center gap-3 py-4 border-2 border-border rounded-2xl font-bold hover:bg-muted transition-colors active:scale-95"
-                   >
-                     <Chrome className="w-5 h-5" />
-                     Google
-                   </button>
-                   <button
-                     onClick={() => handleSocialLogin('facebook')}
-                     className="flex items-center justify-center gap-3 py-4 border-2 border-border rounded-2xl font-bold hover:bg-muted transition-colors active:scale-95"
-                   >
-                     <Facebook className="w-5 h-5" fill="currentColor" />
-                     Facebook
-                   </button>
-                </div>
-              </>
-            )}
-
-            <div className="mt-8 text-center text-muted-foreground font-medium">
-               Already transforming?{' '}
-               <Link href="/login" className="text-primary font-black hover:underline">
-                  Sign In
-               </Link>
+          {/* Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-white/10"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-[#0f0f0f] text-gray-400">Or sign up with</span>
             </div>
           </div>
-        </div>
-      </main>
 
-      <Footer />
+          {/* Social Signup */}
+          <div className="grid grid-cols-2 gap-4">
+            <button className="px-4 py-3 bg-[#1a1a1a] border border-white/10 rounded-lg hover:bg-white/5 transition-colors">
+              <span className="text-sm">Google</span>
+            </button>
+            <button className="px-4 py-3 bg-[#1a1a1a] border border-white/10 rounded-lg hover:bg-white/5 transition-colors">
+              <span className="text-sm">Facebook</span>
+            </button>
+          </div>
+
+          {/* Login Link */}
+          <p className="mt-6 text-center text-gray-400">
+            Already have an account?{' '}
+            <Link href="/login" className="text-[#6dccc4] hover:underline">
+              Sign in
+            </Link>
+          </p>
+        </div>
+
+        {/* Back to Home */}
+        <div className="text-center mt-6">
+          <Link href="/" className="text-gray-400 hover:text-white transition-colors">
+            ← Back to Home
+          </Link>
+        </div>
+      </div>
     </div>
-  )
+  );
 }

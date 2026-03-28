@@ -1,53 +1,40 @@
-import Link from 'next/link'
-import { Header } from '@/components/Header'
-import { Footer } from '@/components/Footer'
-import { Brain, Utensils, TrendingUp, CheckCircle, ArrowRight } from 'lucide-react'
-import Image from 'next/image'
+'use client';
+import Link from 'next/link';
+import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
+import { Brain, Utensils, TrendingUp, CheckCircle, ArrowRight } from 'lucide-react';
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-background text-foreground selection:bg-primary selection:text-primary-foreground">
+    <div className="min-h-screen bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white">
       <Header />
 
       {/* Hero Section */}
-      <section className="relative pt-40 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        {/* Abstract Background Elements */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl aspect-square bg-primary/5 rounded-full blur-3xl -z-10" />
-        
+      <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div className="animate-in fade-in slide-in-from-left-8 duration-700">
-              <h1 className="text-5xl md:text-7xl font-bold mb-8 leading-[1.1] tracking-tight text-foreground">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <h1 className="text-5xl md:text-6xl mb-6 leading-tight">
                 Fix Your Body.
                 <br />
-                <span className="text-primary">Build Real Strength.</span>
+                <span className="text-[#6dccc4]">Build Real Strength.</span>
               </h1>
-              <p className="text-xl text-muted-foreground mb-10 leading-relaxed max-w-xl">
-                AI-powered fitness and wellness plans tailored to your goals. From pain relief to peak performance, we guide you every step of the way with data-driven precision.
+              <p className="text-xl text-gray-600 dark:text-gray-400 mb-8">
+                AI-powered fitness and wellness plans tailored to your goals. From pain relief to peak performance, we guide you every step of the way.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link
-                  href="/onboarding"
-                  className="inline-flex items-center justify-center gap-2 px-8 py-5 bg-primary text-primary-foreground rounded-2xl font-semibold text-lg hover:opacity-95 transition-all shadow-lg shadow-primary/20 active:scale-95 duration-200"
-                >
-                  Start Your Plan
-                  <ArrowRight className="w-5 h-5" />
-                </Link>
-                <Link
-                   href="#how-it-works"
-                   className="inline-flex items-center justify-center gap-2 px-8 py-5 border border-border rounded-2xl font-semibold text-lg hover:bg-accent transition-all duration-200"
-                >
-                   How It Works
-                </Link>
-              </div>
+              <Link
+                href="/signup"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-[#6dccc4] text-[#1a1a1a] rounded-lg hover:bg-[#5fbbb3] transition-colors text-lg"
+              >
+                Start Your Plan
+                <ArrowRight className="w-5 h-5" />
+              </Link>
             </div>
-            <div className="relative aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl border border-border animate-in fade-in slide-in-from-bottom-8 duration-1000">
-              <Image
+            <div className="relative h-[400px] rounded-2xl overflow-hidden">
+              <img
                 src="https://images.unsplash.com/photo-1759572985980-c9af2f1ae4af?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXRuZXNzJTIwc3RyZW5ndGglMjB0cmFpbmluZyUyMHdvbWFufGVufDF8fHx8MTc3NDYzNTM2OXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
                 alt="Fitness Training"
-                fill
-                className="object-cover"
-                priority
+                className="w-full h-full object-cover"
               />
             </div>
           </div>
@@ -55,41 +42,41 @@ export default function LandingPage() {
       </section>
 
       {/* How It Works */}
-      <section id="how-it-works" className="py-24 px-4 sm:px-6 lg:px-8 bg-accent/30 relative">
+      <section id="how-it-works" className="py-20 px-4 sm:px-6 lg:px-8 bg-[#0f0f0f]">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-20 max-w-2xl mx-auto">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">How It Works</h2>
-            <p className="text-xl text-muted-foreground">Three simple steps to transform your vision into reality with AI precision.</p>
+          <div className="text-center mb-16">
+            <h2 className="text-4xl mb-4">How It Works</h2>
+            <p className="text-xl text-gray-400">Three simple steps to transform your wellness journey</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="group bg-card p-10 rounded-3xl border border-border hover:border-primary/50 transition-all duration-300 shadow-sm hover:shadow-xl">
-              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300">
-                <span className="text-2xl font-bold text-primary italic">01</span>
+            <div className="bg-[#1a1a1a] p-8 rounded-2xl border border-white/10">
+              <div className="w-12 h-12 rounded-full bg-[#6dccc4]/20 flex items-center justify-center mb-6">
+                <span className="text-2xl text-[#6dccc4]">1</span>
               </div>
-              <h3 className="text-2xl font-bold mb-4">Complete Assessment</h3>
-              <p className="text-muted-foreground leading-relaxed">
-                Answer personalized questions about your goals, pain points, and health history. Our AI analyzes your unique needs to find the perfect starting point.
+              <h3 className="text-2xl mb-4">Complete Assessment</h3>
+              <p className="text-gray-400">
+                Answer personalized questions about your goals, pain points, and health history. Our AI analyzes your unique needs.
               </p>
             </div>
 
-            <div className="group bg-card p-10 rounded-3xl border border-border hover:border-primary/50 transition-all duration-300 shadow-sm hover:shadow-xl relative md:translate-y-8">
-              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300">
-                <span className="text-2xl font-bold text-primary italic">02</span>
+            <div className="bg-[#1a1a1a] p-8 rounded-2xl border border-white/10">
+              <div className="w-12 h-12 rounded-full bg-[#6dccc4]/20 flex items-center justify-center mb-6">
+                <span className="text-2xl text-[#6dccc4]">2</span>
               </div>
-              <h3 className="text-2xl font-bold mb-4">Get Your AI Plan</h3>
-              <p className="text-muted-foreground leading-relaxed">
-                Receive a customized workout and nutrition protocol designed specifically for your body and goals, evolving in real-time as you progress.
+              <h3 className="text-2xl mb-4">Get Your Plan</h3>
+              <p className="text-gray-400">
+                Receive a customized workout and nutrition plan designed specifically for your body and goals.
               </p>
             </div>
 
-            <div className="group bg-card p-10 rounded-3xl border border-border hover:border-primary/50 transition-all duration-300 shadow-sm hover:shadow-xl">
-              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300">
-                <span className="text-2xl font-bold text-primary italic">03</span>
+            <div className="bg-[#1a1a1a] p-8 rounded-2xl border border-white/10">
+              <div className="w-12 h-12 rounded-full bg-[#6dccc4]/20 flex items-center justify-center mb-6">
+                <span className="text-2xl text-[#6dccc4]">3</span>
               </div>
-              <h3 className="text-2xl font-bold mb-4">Track & Adapt</h3>
-              <p className="text-muted-foreground leading-relaxed">
-                Log your progress, swap exercises, and watch your plan adapt as you get stronger and healthier. We grow with you, ensuring peak performance.
+              <h3 className="text-2xl mb-4">Track & Adapt</h3>
+              <p className="text-gray-400">
+                Log your progress, swap exercises, and watch your plan evolve as you get stronger and healthier.
               </p>
             </div>
           </div>
@@ -97,63 +84,62 @@ export default function LandingPage() {
       </section>
 
       {/* Features */}
-      <section id="features" className="py-24 px-4 sm:px-6 lg:px-8">
+      <section id="features" className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-20 max-w-2xl mx-auto">
-            <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-primary mb-4">Features</h2>
-            <h3 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">Built for Your Success</h3>
-            <p className="text-xl text-muted-foreground">Everything you need to achieve your wellness goals, all in one intelligent platform.</p>
+          <div className="text-center mb-16">
+            <h2 className="text-4xl mb-4">Built for Your Success</h2>
+            <p className="text-xl text-gray-400">Everything you need to achieve your wellness goals</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             {/* AI Plans */}
-            <div className="flex gap-8 group">
-              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:rotate-6 transition-transform">
-                <Brain className="w-8 h-8 text-primary" />
+            <div className="flex gap-6">
+              <div className="w-12 h-12 rounded-lg bg-[#6dccc4]/20 flex items-center justify-center flex-shrink-0">
+                <Brain className="w-6 h-6 text-[#6dccc4]" />
               </div>
               <div>
-                <h3 className="text-2xl font-bold mb-4">AI-Powered Training</h3>
-                <p className="text-muted-foreground leading-relaxed text-lg">
-                  Our system creates personalized workout routines based on your body&apos;s unique needs, goals, and limitations. It&apos;s like having a world-class coach 24/7.
+                <h3 className="text-2xl mb-3">AI-Powered Plans</h3>
+                <p className="text-gray-400">
+                  Our intelligent system creates personalized workout routines based on your body's unique needs, goals, and limitations.
                 </p>
               </div>
             </div>
 
             {/* Nutrition */}
-            <div className="flex gap-8 group">
-              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:rotate-6 transition-transform">
-                <Utensils className="w-8 h-8 text-primary" />
+            <div className="flex gap-6">
+              <div className="w-12 h-12 rounded-lg bg-[#6dccc4]/20 flex items-center justify-center flex-shrink-0">
+                <Utensils className="w-6 h-6 text-[#6dccc4]" />
               </div>
               <div>
-                <h3 className="text-2xl font-bold mb-4">Macro-Balanced Nutrition</h3>
-                <p className="text-muted-foreground leading-relaxed text-lg">
-                  Get meal plans tailored to your dietary preferences, restrictions, and wellness goals with detailed macro breakdowns and shopping lists.
+                <h3 className="text-2xl mb-3">Custom Nutrition</h3>
+                <p className="text-gray-400">
+                  Get meal plans tailored to your dietary preferences, restrictions, and wellness goals with detailed macro breakdowns.
                 </p>
               </div>
             </div>
 
             {/* Progress Tracking */}
-            <div className="flex gap-8 group">
-              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:rotate-6 transition-transform">
-                <TrendingUp className="w-8 h-8 text-primary" />
+            <div className="flex gap-6">
+              <div className="w-12 h-12 rounded-lg bg-[#6dccc4]/20 flex items-center justify-center flex-shrink-0">
+                <TrendingUp className="w-6 h-6 text-[#6dccc4]" />
               </div>
               <div>
-                <h3 className="text-2xl font-bold mb-4">Advanced Analytics</h3>
-                <p className="text-muted-foreground leading-relaxed text-lg">
-                  Monitor your improvements with detailed analytics, volume tracking, and visual graphs that translate your hard work into clear data.
+                <h3 className="text-2xl mb-3">Progress Tracking</h3>
+                <p className="text-gray-400">
+                  Monitor your improvements with detailed analytics, set tracking, and visual progress charts that keep you motivated.
                 </p>
               </div>
             </div>
 
             {/* Mobility Focus */}
-            <div className="flex gap-8 group">
-              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:rotate-6 transition-transform">
-                <CheckCircle className="w-8 h-8 text-primary" />
+            <div className="flex gap-6">
+              <div className="w-12 h-12 rounded-lg bg-[#6dccc4]/20 flex items-center justify-center flex-shrink-0">
+                <CheckCircle className="w-6 h-6 text-[#6dccc4]" />
               </div>
               <div>
-                <h3 className="text-2xl font-bold mb-4">Mobility & Recovery</h3>
-                <p className="text-muted-foreground leading-relaxed text-lg">
-                   Access guided stretches, mobility self-tests, and recovery protocols designed to keep you pain-free and moving at full capacity.
+                <h3 className="text-2xl mb-3">Mobility & Recovery</h3>
+                <p className="text-gray-400">
+                  Access guided stretches, mobility tests, and recovery protocols designed to keep you pain-free and moving well.
                 </p>
               </div>
             </div>
@@ -162,49 +148,49 @@ export default function LandingPage() {
       </section>
 
       {/* Testimonials */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-accent/30">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#0f0f0f]">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight">Success Stories</h2>
-            <p className="text-xl text-muted-foreground">Real results from real people who prioritized their health.</p>
+          <div className="text-center mb-16">
+            <h2 className="text-4xl mb-4">Success Stories</h2>
+            <p className="text-xl text-gray-400">Real results from real people</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-card p-10 rounded-[2.5rem] border border-border shadow-sm">
-              <p className="text-foreground text-lg mb-8 leading-relaxed">
-                &quot;After years of back pain, BekFit&apos;s personalized plan helped me move pain-free again. The AI actually adapts to how I feel each session.&quot;
+            <div className="bg-[#1a1a1a] p-8 rounded-2xl border border-white/10">
+              <p className="text-gray-300 mb-6">
+                "After years of back pain, BekFit's personalized plan helped me move pain-free again. The AI really understands what my body needs."
               </p>
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-primary/10"></div>
+                <div className="w-12 h-12 rounded-full bg-[#6dccc4]/20"></div>
                 <div>
-                  <p className="font-bold">Sarah M.</p>
-                  <p className="text-sm text-muted-foreground">Pain Relief Program</p>
+                  <p className="font-medium">Sarah M.</p>
+                  <p className="text-sm text-gray-400">Pain Relief</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-card p-10 rounded-[2.5rem] border border-border shadow-sm">
-              <p className="text-foreground text-lg mb-8 leading-relaxed">
-                &quot;Lost 15kg in 4 months with the custom nutrition and workout plan. The variety in the routines kept me consistent for the first time.&quot;
+            <div className="bg-[#1a1a1a] p-8 rounded-2xl border border-white/10">
+              <p className="text-gray-300 mb-6">
+                "Lost 15kg in 4 months with the custom nutrition and workout plan. The flexibility to swap exercises kept me consistent."
               </p>
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-primary/10"></div>
+                <div className="w-12 h-12 rounded-full bg-[#6dccc4]/20"></div>
                 <div>
-                  <p className="font-bold">Ahmed K.</p>
-                  <p className="text-sm text-muted-foreground">Weight Management</p>
+                  <p className="font-medium">Ahmed K.</p>
+                  <p className="text-sm text-gray-400">Weight Loss</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-card p-10 rounded-[2.5rem] border border-border shadow-sm">
-              <p className="text-foreground text-lg mb-8 leading-relaxed">
-                &quot;The mobility tests were an eye-opener. I&apos;ve improved my squat depth and shoulder mobility significantly in just 6 weeks.&quot;
+            <div className="bg-[#1a1a1a] p-8 rounded-2xl border border-white/10">
+              <p className="text-gray-300 mb-6">
+                "The mobility tests showed me exactly what I needed to work on. I feel stronger and more flexible than ever before."
               </p>
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-primary/10"></div>
+                <div className="w-12 h-12 rounded-full bg-[#6dccc4]/20"></div>
                 <div>
-                  <p className="font-bold">Maya R.</p>
-                  <p className="text-sm text-muted-foreground">Functional Strength</p>
+                  <p className="font-medium">Maya R.</p>
+                  <p className="text-sm text-gray-400">Fitness Improvement</p>
                 </div>
               </div>
             </div>
@@ -213,24 +199,23 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Banner */}
-      <section className="py-32 px-4 sm:px-6 lg:px-8 text-center relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl aspect-video bg-primary/10 rounded-full blur-[120px] -z-10" />
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl md:text-6xl font-bold mb-8 leading-tight">Ready to Transform?</h2>
-          <p className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto">
-            Join thousands who have already started their journey to a healthier, stronger life with BekFit AI.
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-4xl mb-6">Ready to Transform Your Wellness?</h2>
+          <p className="text-xl text-gray-400 mb-8">
+            Join thousands who have already started their journey to a healthier, stronger life.
           </p>
           <Link
-            href="/onboarding"
-            className="inline-flex items-center gap-2 px-10 py-5 bg-primary text-primary-foreground rounded-2xl font-bold text-xl hover:opacity-95 transition-all shadow-xl shadow-primary/20 active:scale-95 duration-200"
+            href="/signup"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-[#6dccc4] text-[#1a1a1a] rounded-lg hover:bg-[#5fbbb3] transition-colors text-lg"
           >
-            Start Your Journey
-            <ArrowRight className="w-6 h-6" />
+            Start Your Plan
+            <ArrowRight className="w-5 h-5" />
           </Link>
         </div>
       </section>
 
       <Footer />
     </div>
-  )
+  );
 }

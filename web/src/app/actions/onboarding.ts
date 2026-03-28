@@ -53,5 +53,5 @@ export async function submitOnboarding(formData: Record<string, any>) {
   }
 
   // 5. Redirect to Dashboard
-  redirect('/dashboard')
+  redirect('/home')
 }
