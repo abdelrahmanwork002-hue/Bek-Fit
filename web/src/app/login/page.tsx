@@ -23,7 +23,7 @@ export default function Login() {
 
     try {
       await login(email, password);
-      router.push('/home');
+      window.location.href = '/home';
     } catch (err) {
       setError('Invalid email or password');
     } finally {
