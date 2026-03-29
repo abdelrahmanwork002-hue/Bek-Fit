@@ -24,8 +24,9 @@ export default function Login() {
     try {
       await login(email, password);
       window.location.href = '/home';
-    } catch (err) {
-      setError('Invalid email or password');
+    } catch (err: any) {
+      alert(`Debug Error: ${err.message || 'Unknown error'}`);
+      setError(err.message || 'Invalid email or password');
     } finally {
       setIsLoading(false);
     }
@@ -59,7 +60,7 @@ export default function Login() {
 
         {/* Login Form */}
         <div className="bg-[#0f0f0f] rounded-2xl border border-white/10 p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} noValidate className="space-y-6">
             {error && (
               <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-red-500 text-sm">
                 {error}
