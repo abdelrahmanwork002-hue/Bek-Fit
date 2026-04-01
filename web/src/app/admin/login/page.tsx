@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ShieldAlert, ArrowRight, Loader2, Lock, Mail } from 'lucide-react'
-import { createClient } from '@supabase/supabase-js' // Note: This uses standard client, but in full prod use @supabase/ssr
+import { createClient } from '@/lib/supabase/client'
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('')
@@ -13,10 +13,8 @@ export default function AdminLogin() {
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
-  // Initialize supabase
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-  const supabase = createClient(supabaseUrl, supabaseKey)
+  // Initialize supabase with SSR cookies
+  const supabase = createClient()
 
   const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -37,7 +35,7 @@ export default function AdminLogin() {
       setError("Invalid Administrative Credentials or Protocol mismatch.")
       setIsLoading(false)
     } else {
-      router.push('/admin')
+      window.location.href = '/admin'
     }
   }
 
