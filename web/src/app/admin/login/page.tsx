@@ -21,13 +21,8 @@ export default function AdminLogin() {
     setIsLoading(true)
     setError(null)
 
-    // ENFORCING ARCHITECTURAL SEPARATION
-    // Bypassing consumer-users by prepending 'admin_' to identical credentials
-    // This allows exact duplicate passwords/emails to exist in two distinct universes
-    const adminIdentityEmail = `admin_${email}`
-
     const { data, error } = await supabase.auth.signInWithPassword({
-      email: adminIdentityEmail,
+      email: email,
       password,
     })
 
@@ -42,10 +37,8 @@ export default function AdminLogin() {
   // Debug tool to create the admin if they don't exist yet with the prefix
   const handleAdminSignup = async () => {
     setIsLoading(true)
-    const adminIdentityEmail = `admin_${email}`
-    
     const { data, error } = await supabase.auth.signUp({
-      email: adminIdentityEmail,
+      email: email,
       password,
       options: {
          data: { is_admin: true, full_name: 'Superadmin Provider' }
