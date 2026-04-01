@@ -1,6 +1,7 @@
 'use client';
-import { useState } from 'react';
-import { Search, Eye, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Eye, CheckCircle, XCircle, Clock, Loader2 } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
 interface User {
   id: string;
@@ -22,72 +23,65 @@ export function UserManagement() {
   const [filterPlanStatus, setFilterPlanStatus] = useState('all');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  const users: User[] = [
-    {
-      id: '1',
-      name: 'Sarah Johnson',
-      email: 'sarah.j@email.com',
-      goal: 'Weight Loss',
-      onboardingComplete: true,
-      planStatus: 'active',
-      paymentStatus: 'active',
-      lastActivity: '2 hours ago',
-      joinDate: '2026-03-15',
-      age: 32,
-      painAreas: ['Lower Back']
-    },
-    {
-      id: '2',
-      name: 'Mike Chen',
-      email: 'mike.chen@email.com',
-      goal: 'Muscle Gain',
-      onboardingComplete: true,
-      planStatus: 'active',
-      paymentStatus: 'pending',
-      lastActivity: '1 day ago',
-      joinDate: '2026-03-20',
-      age: 28
-    },
-    {
-      id: '3',
-      name: 'Emma Wilson',
-      email: 'emma.w@email.com',
-      goal: 'Pain Management',
-      onboardingComplete: false,
-      planStatus: 'inactive',
-      paymentStatus: 'expired',
-      lastActivity: '5 days ago',
-      joinDate: '2026-02-10',
-      age: 45,
-      painAreas: ['Neck', 'Shoulders']
-    },
-    {
-      id: '4',
-      name: 'James Martinez',
-      email: 'james.m@email.com',
-      goal: 'General Fitness',
-      onboardingComplete: true,
-      planStatus: 'active',
-      paymentStatus: 'active',
-      lastActivity: '30 min ago',
-      joinDate: '2026-03-25',
-      age: 35
-    },
-    {
-      id: '5',
-      name: 'Lisa Anderson',
-      email: 'lisa.a@email.com',
-      goal: 'Strength Training',
-      onboardingComplete: true,
-      planStatus: 'inactive',
-      paymentStatus: 'pending',
-      lastActivity: '3 hours ago',
-      joinDate: '2026-03-18',
-      age: 29
-    },
-  ];
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const supabase = createClient();
 
-  const filteredUsers = users.filter(user => {
+  useEffect(() => {
+    async function fetchUsers() {
+      const { data, error } = await supabase
+        .from('users')
+        .select(`
+          id,
+          full_name,
+          email,
+          created_at,
+          profile_data,
+          is_active,
+          goals ( title ),
+          payments ( status, processed_at ),
+          plans ( is_active )
+        `);
+
+      if (error) {
+        console.error("Supabase Error fetching users:", error);
+      } else if (data) {
+        const liveUsers: User[] = data.map((u: any) => {
+          let paymentStatus: 'active' | 'pending' | 'expired' = 'pending';
+          if (u.payments && u.payments.length > 0) {
+            paymentStatus = (u.payments[0].status as any) || 'pending';
+          }
+          
+          let planStatus: 'active' | 'inactive' = 'inactive';
+          if (u.plans && u.plans.length > 0) {
+            planStatus = u.plans[0].is_active ? 'active' : 'inactive';
+          }
+
+          const profileData = u.profile_data || {};
+
+          return {
+            id: u.id,
+            name: u.full_name || 'Unnamed',
+            email: u.email || 'No Email',
+            goal: u.goals?.title || 'None',
+            onboardingComplete: !!profileData.age, // Fallback if explicit flag is missing
+            planStatus,
+            paymentStatus,
+            lastActivity: 'Recently active',
+            joinDate: new Date(u.created_at).toISOString().split('T')[0],
+            age: profileData.age || undefined,
+            painAreas: profileData.pain_areas || [],
+          };
+        });
+        setUsers(liveUsers);
+      }
+      setLoading(false);
+    }
+
+    fetchUsers();
+  }, [supabase]);
+
+  const filteredUsers = users.filter((user) => {
     const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesPayment = filterPaymentStatus === 'all' || user.paymentStatus === filterPaymentStatus;
@@ -165,9 +159,15 @@ export function UserManagement() {
         </div>
       </div>
 
-      {/* User List */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        <table className="w-full">
+      {/* User List Loading State or Table */}
+      {loading ? (
+        <div className="bg-white rounded-lg border border-gray-200 p-12 flex flex-col items-center justify-center text-gray-400">
+           <Loader2 className="w-8 h-8 animate-spin text-blue-500 mb-4" />
+           <p>Connecting to Supabase Database...</p>
+        </div>
+      ) : (
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
