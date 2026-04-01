@@ -33,14 +33,14 @@ export default function AdminLogin() {
     } 
 
     if (data?.user) {
-      // Hard boundary check: Must genuinely possess the is_admin flag in the database
-      const { data: userRecord } = await supabase
-         .from('users')
-         .select('is_admin')
+      // Hard boundary check: Must genuinely exist inside the segregated `admins` table
+      const { data: adminRecord } = await supabase
+         .from('admins')
+         .select('id')
          .eq('id', data.user.id)
          .single()
          
-      if (userRecord?.is_admin === true) {
+      if (adminRecord) {
          window.location.href = '/admin'
       } else {
          // Violent rejection of consumer users attempting admin breach
@@ -49,6 +49,33 @@ export default function AdminLogin() {
          setIsLoading(false)
       }
     }
+  }
+
+  // Utility to seed the segregated admin database
+  const handleAdminSignup = async () => {
+    setIsLoading(true)
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email: email,
+      password,
+    })
+    
+    if (authError) {
+       setError(authError.message)
+    } else if (authData?.user) {
+       // Insert directly into the isolated admins table
+       const { error: insertError } = await supabase.from('admins').insert({
+          id: authData.user.id,
+          email: email,
+          full_name: 'System Administrator'
+       })
+       
+       if (insertError) {
+          setError(`Table Error: ${insertError.message}`)
+       } else {
+          setError("Admin profile securely seeded into segregated database! Please Authorize.")
+       }
+    }
+    setIsLoading(false)
   }
 
   return (
@@ -107,6 +134,14 @@ export default function AdminLogin() {
                className="w-full py-4 bg-primary text-zinc-950 rounded-xl font-black uppercase tracking-widest text-sm hover:brightness-110 transition-all flex items-center justify-center gap-2"
             >
                {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Authorize"}
+            </button>
+            
+            <button
+               type="button"
+               onClick={handleAdminSignup}
+               className="w-full py-2 text-zinc-500 font-medium text-xs hover:text-white transition-colors underline mt-4"
+            >
+               Force Seed Segregated Admin
             </button>
          </form>
          

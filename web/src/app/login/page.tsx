@@ -27,13 +27,13 @@ export default function Login() {
       
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const { data: userRecord } = await supabase
-           .from('users')
-           .select('is_admin')
+        const { data: adminRecord } = await supabase
+           .from('admins')
+           .select('id')
            .eq('id', user.id)
            .single();
            
-        if (userRecord?.is_admin === true) {
+        if (adminRecord) {
            await supabase.auth.signOut();
            throw new Error("Administrators must authenticate via the restricted /admin/login terminal.");
         }
