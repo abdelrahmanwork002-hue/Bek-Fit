@@ -29,28 +29,26 @@ export default function AdminLogin() {
     if (error) {
       setError(`Auth Error: ${error.message}`)
       setIsLoading(false)
-    } else {
-      window.location.href = '/admin'
-    }
-  }
+      return;
+    } 
 
-  // Debug tool to create the admin if they don't exist yet with the prefix
-  const handleAdminSignup = async () => {
-    setIsLoading(true)
-    const { data, error } = await supabase.auth.signUp({
-      email: email,
-      password,
-      options: {
-         data: { is_admin: true, full_name: 'Superadmin Provider' }
+    if (data?.user) {
+      // Hard boundary check: Must genuinely possess the is_admin flag in the database
+      const { data: userRecord } = await supabase
+         .from('users')
+         .select('is_admin')
+         .eq('id', data.user.id)
+         .single()
+         
+      if (userRecord?.is_admin === true) {
+         window.location.href = '/admin'
+      } else {
+         // Violent rejection of consumer users attempting admin breach
+         await supabase.auth.signOut()
+         setError("ACCESS RESTRICTED: Standard UI users are strictly prohibited from utilizing the Administrative Gateway. Please use the consumer portal.")
+         setIsLoading(false)
       }
-    })
-    
-    if (error) {
-       setError(error.message)
-    } else {
-       setError("Admin profile successfully seeded! Please Login.")
     }
-    setIsLoading(false)
   }
 
   return (
@@ -109,14 +107,6 @@ export default function AdminLogin() {
                className="w-full py-4 bg-primary text-zinc-950 rounded-xl font-black uppercase tracking-widest text-sm hover:brightness-110 transition-all flex items-center justify-center gap-2"
             >
                {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Authorize"}
-            </button>
-            
-            <button
-               type="button"
-               onClick={handleAdminSignup}
-               className="w-full py-2 text-zinc-500 font-medium text-xs hover:text-white transition-colors underline"
-            >
-               Force Seed Admin Account
             </button>
          </form>
          

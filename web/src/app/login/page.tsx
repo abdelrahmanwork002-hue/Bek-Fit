@@ -10,6 +10,7 @@ const logo = '/Bek Fit Logo.png';;
 export default function Login() {
   const router = useRouter();
   const { login } = useAuth();
+  const supabase = createClient();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -23,6 +24,21 @@ export default function Login() {
 
     try {
       await login(email, password);
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: userRecord } = await supabase
+           .from('users')
+           .select('is_admin')
+           .eq('id', user.id)
+           .single();
+           
+        if (userRecord?.is_admin === true) {
+           await supabase.auth.signOut();
+           throw new Error("Administrators must authenticate via the restricted /admin/login terminal.");
+        }
+      }
+      
       window.location.href = '/home';
     } catch (err: any) {
       alert(`Debug Error: ${err.message || 'Unknown error'}`);
