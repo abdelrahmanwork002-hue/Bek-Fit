@@ -32,7 +32,7 @@ export default function AdminLogin() {
     })
 
     if (error) {
-      setError("Invalid Administrative Credentials or Protocol mismatch.")
+      setError(`Auth Error: ${error.message}`)
       setIsLoading(false)
     } else {
       window.location.href = '/admin'
