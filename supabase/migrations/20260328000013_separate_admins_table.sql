@@ -13,6 +13,7 @@ ALTER TABLE public.admins ENABLE ROW LEVEL SECURITY;
 
 -- Admins can read their own row, but let's just make it readable for the engine
 CREATE POLICY "Admins can view admins" ON public.admins FOR SELECT USING (id = auth.uid());
+CREATE POLICY "Seed Admin Logic" ON public.admins FOR INSERT WITH CHECK (id = auth.uid());
 
 -- Redefine the is_admin() RPC to check the separated admins table instead of the users table
 CREATE OR REPLACE FUNCTION public.is_admin()
