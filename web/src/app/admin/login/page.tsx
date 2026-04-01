@@ -54,25 +54,42 @@ export default function AdminLogin() {
   // Utility to seed the segregated admin database
   const handleAdminSignup = async () => {
     setIsLoading(true)
-    const { data: authData, error: authError } = await supabase.auth.signUp({
+
+    // 1. Try signing in normally first, because signUp blocks sessions if account already exists secretly
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
       email: email,
       password,
     })
     
+    // If sign in fails, try sign up
+    let activeUserId = authData?.user?.id;
     if (authError) {
-       setError(authError.message)
-    } else if (authData?.user) {
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+      })
+      if (signUpError) {
+        setError(`Auth Error: ${signUpError.message}`)
+        setIsLoading(false)
+        return
+      }
+      activeUserId = signUpData?.user?.id;
+      // Need to sign in to get active session for RLS passing
+      await supabase.auth.signInWithPassword({ email, password })
+    }
+    
+    if (activeUserId) {
        // Insert directly into the isolated admins table
        const { error: insertError } = await supabase.from('admins').insert({
-          id: authData.user.id,
+          id: activeUserId,
           email: email,
           full_name: 'System Administrator'
        })
        
        if (insertError) {
-          setError(`Table Error: ${insertError.message}`)
+          setError(`Table Error: ${insertError.message} (Try clicking Authorize if you already seeded!)`)
        } else {
-          setError("Admin profile securely seeded into segregated database! Please Authorize.")
+          setError("Admin profile securely seeded into segregated database! Please click Authorize now.")
        }
     }
     setIsLoading(false)
