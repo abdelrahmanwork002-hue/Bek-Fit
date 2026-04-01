@@ -121,6 +121,12 @@ export function ExerciseLibrary() {
       </div>
 
       {/* Exercise List */}
+      {loading ? (
+        <div className="bg-white rounded-lg border border-gray-200 p-12 flex flex-col items-center justify-center text-gray-400">
+           <Loader2 className="w-8 h-8 animate-spin text-blue-500 mb-4" />
+           <p>Syncing Exercise Protocols from Database...</p>
+        </div>
+      ) : (
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
@@ -194,6 +200,7 @@ export function ExerciseLibrary() {
           </tbody>
         </table>
       </div>
+      )}
 
       {/* Add Exercise Modal */}
       {showAddModal && (

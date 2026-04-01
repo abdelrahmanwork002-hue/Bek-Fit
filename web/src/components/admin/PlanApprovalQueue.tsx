@@ -246,6 +246,7 @@ export function PlanApprovalQueue() {
           </div>
         ))}
       </div>
+      )}
 
       {/* Plan Review Modal */}
       {selectedPlan && (
