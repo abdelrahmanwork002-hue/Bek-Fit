@@ -34,6 +34,7 @@ export function Header() {
         { name: 'Tips', href: '/tips' },
         { name: 'Blog', href: '/blog' },
         { name: 'Profile', href: '/profile' },
+        { name: 'Admin', href: '/admin' },
       ];
 
   const toggleLanguage = () => {
