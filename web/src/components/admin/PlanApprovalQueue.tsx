@@ -1,6 +1,7 @@
 'use client';
-import { useState } from 'react';
-import { Eye, CheckCircle, XCircle, AlertTriangle, Edit2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Eye, CheckCircle, XCircle, AlertTriangle, Edit2, Loader2 } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
 interface PendingPlan {
   id: string;
@@ -21,78 +22,57 @@ export function PlanApprovalQueue() {
   const [filterStatus, setFilterStatus] = useState('pending');
   const [selectedPlan, setSelectedPlan] = useState<PendingPlan | null>(null);
 
-  const plans: PendingPlan[] = [
-    {
-      id: '1',
-      userName: 'Sarah Johnson',
-      userEmail: 'sarah.j@email.com',
-      goal: 'Weight Loss',
-      age: 32,
-      painAreas: ['Lower Back'],
-      safetyFlags: ['Chronic pain reported'],
-      createdDate: '2026-03-28',
-      status: 'pending',
-      planSummary: '12-week progressive weight loss program with low-impact exercises',
-      weekCount: 12,
-      workoutsPerWeek: 4
-    },
-    {
-      id: '2',
-      userName: 'Mike Chen',
-      userEmail: 'mike.chen@email.com',
-      goal: 'Muscle Gain',
-      age: 28,
-      painAreas: [],
-      safetyFlags: [],
-      createdDate: '2026-03-27',
-      status: 'pending',
-      planSummary: '8-week muscle building program focusing on compound movements',
-      weekCount: 8,
-      workoutsPerWeek: 5
-    },
-    {
-      id: '3',
-      userName: 'Emma Wilson',
-      userEmail: 'emma.w@email.com',
-      goal: 'Pain Management',
-      age: 45,
-      painAreas: ['Neck', 'Shoulders'],
-      safetyFlags: ['Multiple pain areas', 'Age 40+'],
-      createdDate: '2026-03-27',
-      status: 'pending',
-      planSummary: 'Gentle mobility and strength program for neck/shoulder pain relief',
-      weekCount: 6,
-      workoutsPerWeek: 3
-    },
-    {
-      id: '4',
-      userName: 'James Martinez',
-      userEmail: 'james.m@email.com',
-      goal: 'General Fitness',
-      age: 35,
-      painAreas: [],
-      safetyFlags: [],
-      createdDate: '2026-03-26',
-      status: 'approved',
-      planSummary: '10-week balanced fitness program with cardio and strength',
-      weekCount: 10,
-      workoutsPerWeek: 4
-    },
-    {
-      id: '5',
-      userName: 'David Lee',
-      userEmail: 'david.l@email.com',
-      goal: 'Strength Training',
-      age: 52,
-      painAreas: ['Knees'],
-      safetyFlags: ['Age 50+', 'Joint concerns'],
-      createdDate: '2026-03-25',
-      status: 'pending',
-      planSummary: 'Joint-friendly strength program with modified movements',
-      weekCount: 8,
-      workoutsPerWeek: 3
-    },
-  ];
+  const [plans, setPlans] = useState<PendingPlan[]>([]);
+  const [loading, setLoading] = useState(true);
+  const supabase = createClient();
+
+  useEffect(() => {
+    async function fetchQueue() {
+      const { data, error } = await supabase
+        .from('users')
+        .select(`
+          id,
+          full_name,
+          email,
+          created_at,
+          profile_data,
+          goals ( title ),
+          plans ( is_active )
+        `);
+      
+      if (!error && data) {
+         const queue: PendingPlan[] = data.map((u: any) => {
+            const profile = u.profile_data || {};
+            let status: 'pending' | 'approved' | 'rejected' = 'pending';
+            if (u.plans && u.plans.length > 0) {
+              status = u.plans[0].is_active ? 'approved' : 'pending';
+            }
+            
+            const flags: string[] = [];
+            if (profile.age > 50) flags.push("Age 50+");
+            if (profile.pain_areas && profile.pain_areas.length > 0) flags.push("Pain management flags");
+            
+            return {
+              id: u.id,
+              userName: u.full_name || 'Unnamed User',
+              userEmail: u.email || 'No Email',
+              goal: u.goals?.title || 'General Fitness',
+              age: profile.age || 0,
+              painAreas: profile.pain_areas || [],
+              safetyFlags: flags,
+              createdDate: new Date(u.created_at).toISOString().split('T')[0],
+              status: status,
+              planSummary: 'AI-generated progressive overload module pending review.',
+              weekCount: 8,
+              workoutsPerWeek: 3
+            }
+         });
+         setPlans(queue);
+      }
+      setLoading(false);
+    }
+    fetchQueue();
+  }, [supabase]);
 
   const filteredPlans = plans.filter(plan =>
     filterStatus === 'all' || plan.status === filterStatus
@@ -148,6 +128,12 @@ export function PlanApprovalQueue() {
       </div>
 
       {/* Plan List */}
+      {loading ? (
+        <div className="bg-white rounded-lg border border-gray-200 p-12 flex flex-col items-center justify-center text-gray-400">
+           <Loader2 className="w-8 h-8 animate-spin text-blue-500 mb-4" />
+           <p>Syncing AI Generation Queues...</p>
+        </div>
+      ) : (
       <div className="space-y-4">
         {filteredPlans.map((plan) => (
           <div
