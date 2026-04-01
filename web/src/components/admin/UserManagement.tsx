@@ -249,6 +249,7 @@ export function UserManagement() {
           </tbody>
         </table>
       </div>
+      )}
 
       {/* User Detail Modal */}
       {selectedUser && (
