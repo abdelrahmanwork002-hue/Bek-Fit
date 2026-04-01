@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Search, Plus, Edit2, Trash2, Play, Filter, Loader2 } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, Play, Filter, Loader2, Dumbbell, XCircle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
 interface Exercise {
@@ -65,246 +65,266 @@ export function ExerciseLibrary() {
   });
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-semibold text-gray-900">Exercise Library</h2>
-          <p className="text-gray-600 mt-1">Manage exercises, substitutions, and categories</p>
+          <h2 className="text-3xl font-black text-foreground tracking-tight uppercase">EXERCISE <span className="text-primary underline decoration-primary/30 underline-offset-8">LIBRARY</span></h2>
+          <p className="text-muted-foreground mt-3 font-medium">Manage human optimization protocols and movement patterns.</p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          className="flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-2xl font-black shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all text-xs uppercase tracking-widest"
         >
           <Plus className="w-4 h-4" />
-          Add Exercise
+          Inject Protocol
         </button>
       </div>
 
       {/* Search and Filters */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="md:col-span-2 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+      <div className="bg-card rounded-3xl border border-border p-6 shadow-sm">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="md:col-span-2 relative group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
             <input
               type="text"
-              placeholder="Search exercises..."
+              placeholder="Search exercise database..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-12 pr-4 py-3 bg-secondary/50 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium"
             />
           </div>
 
           <select
             value={filterBodyArea}
             onChange={(e) => setFilterBodyArea(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="px-4 py-3 bg-secondary/50 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-bold text-foreground cursor-pointer"
           >
-            <option value="all">All Body Areas</option>
-            <option value="Chest">Chest</option>
-            <option value="Back">Back</option>
-            <option value="Legs">Legs</option>
-            <option value="Core">Core</option>
-            <option value="Arms">Arms</option>
+            <option value="all">ALL BODY AREAS</option>
+            <option value="Chest">CHEST</option>
+            <option value="Back">BACK</option>
+            <option value="Legs">LEGS</option>
+            <option value="Core">CORE</option>
+            <option value="Arms">ARMS</option>
           </select>
 
           <select
             value={filterDifficulty}
             onChange={(e) => setFilterDifficulty(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="px-4 py-3 bg-secondary/50 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-bold text-foreground cursor-pointer"
           >
-            <option value="all">All Difficulties</option>
-            <option value="Beginner">Beginner</option>
-            <option value="Intermediate">Intermediate</option>
-            <option value="Advanced">Advanced</option>
+            <option value="all">ALL DIFFICULTIES</option>
+            <option value="Beginner">BEGINNER</option>
+            <option value="Intermediate">INTERMEDIATE</option>
+            <option value="Advanced">ADVANCED</option>
           </select>
         </div>
       </div>
 
       {/* Exercise List */}
       {loading ? (
-        <div className="bg-white rounded-lg border border-gray-200 p-12 flex flex-col items-center justify-center text-gray-400">
-           <Loader2 className="w-8 h-8 animate-spin text-blue-500 mb-4" />
-           <p>Syncing Exercise Protocols from Database...</p>
+        <div className="bg-card rounded-3xl border border-border p-20 flex flex-col items-center justify-center text-muted-foreground gap-6 shadow-sm">
+           <div className="relative">
+              <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+              <Loader2 className="w-6 h-6 text-primary absolute inset-0 m-auto animate-pulse" />
+           </div>
+           <div className="text-center">
+              <p className="font-black uppercase tracking-[0.3em] text-foreground text-sm">Synchronizing Library</p>
+              <p className="text-xs font-bold mt-2 opacity-60">Downloading protocol patterns from cloud storage...</p>
+           </div>
         </div>
       ) : (
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-200">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Exercise
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Body Area
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Equipment
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Difficulty
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Sets/Reps
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Used In Plans
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {filteredExercises.map((exercise) => (
-              <tr key={exercise.id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-6 py-4">
-                  <div>
-                    <p className="font-medium text-gray-900">{exercise.name}</p>
-                    <p className="text-sm text-gray-500">{exercise.description}</p>
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-900">{exercise.bodyArea}</td>
-                <td className="px-6 py-4 text-sm text-gray-900">{exercise.equipment}</td>
-                <td className="px-6 py-4">
-                  <span
-                    className={`px-2 py-1 text-xs rounded-full ${
-                      exercise.difficulty === 'Beginner'
-                        ? 'bg-green-100 text-green-700'
-                        : exercise.difficulty === 'Intermediate'
-                        ? 'bg-yellow-100 text-yellow-700'
-                        : 'bg-red-100 text-red-700'
-                    }`}
-                  >
-                    {exercise.difficulty}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-900">
-                  {exercise.sets} × {exercise.reps}
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-900">{exercise.usedInPlans}</td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-2">
-                    <button className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors">
-                      <Play className="w-4 h-4" />
-                    </button>
-                    <button className="p-2 text-gray-600 hover:bg-gray-100 rounded transition-colors">
-                      <Edit2 className="w-4 h-4" />
-                    </button>
-                    <button className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+        <div className="space-y-4">
+          <div className="bg-card rounded-3xl border border-border overflow-hidden shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-secondary/30 border-b border-border">
+                    {[
+                      'Movement Pattern', 'Anatomical Area', 'Equipment', 'Complexity', 'Volume Protocol', 'Deployment Count', 'Operations'
+                    ].map((head) => (
+                      <th key={head} className="px-8 py-5 text-left text-[10px] font-black text-muted-foreground uppercase tracking-widest whitespace-nowrap">
+                        {head}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/50">
+                  {filteredExercises.map((exercise) => (
+                    <tr key={exercise.id} className="hover:bg-secondary/40 transition-all group cursor-default">
+                      <td className="px-8 py-6">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-inner">
+                            <Dumbbell className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <p className="font-black text-foreground uppercase tracking-tight">{exercise.name}</p>
+                            <p className="text-[10px] font-bold text-muted-foreground opacity-60 mt-0.5 uppercase tracking-widest leading-none line-clamp-1 max-w-[200px]">{exercise.description}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-8 py-6">
+                        <span className="text-xs font-black text-foreground uppercase tracking-widest bg-secondary/80 px-3 py-1.5 rounded-lg border border-border/30">
+                          {exercise.bodyArea}
+                        </span>
+                      </td>
+                      <td className="px-8 py-6 text-xs font-bold text-muted-foreground uppercase tracking-wider">{exercise.equipment}</td>
+                      <td className="px-8 py-6">
+                        <span
+                          className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.1em] rounded-lg border ${
+                            exercise.difficulty === 'Beginner'
+                              ? 'bg-green-500/10 text-green-500 border-green-500/20'
+                              : exercise.difficulty === 'Intermediate'
+                              ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
+                              : 'bg-red-500/10 text-red-500 border-red-500/20'
+                          }`}
+                        >
+                          {exercise.difficulty}
+                        </span>
+                      </td>
+                      <td className="px-8 py-6 text-xs font-black text-foreground uppercase tracking-widest">
+                        {exercise.sets} × {exercise.reps}
+                      </td>
+                      <td className="px-8 py-6 text-xs font-black text-muted-foreground uppercase tracking-widest opacity-60">
+                         {exercise.usedInPlans} DEPLOYED
+                      </td>
+                      <td className="px-8 py-6">
+                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button className="p-2 text-primary hover:bg-primary/10 rounded-xl transition-all active:scale-90 border border-primary/10 bg-primary/5">
+                            <Play className="w-4 h-4" />
+                          </button>
+                          <button className="p-2 text-foreground/60 hover:bg-secondary rounded-xl transition-all active:scale-90 border border-border/50">
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button className="p-2 text-destructive hover:bg-destructive/10 rounded-xl transition-all active:scale-90 border border-destructive/10">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Pagination UI */}
+          <div className="flex items-center justify-between px-2 pt-2">
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60">
+              Showing 1-20 of {exercises.length} protocols
+            </p>
+            <div className="flex items-center gap-2">
+              <button className="px-4 py-2 text-[10px] font-black text-muted-foreground opacity-30 cursor-not-allowed uppercase tracking-widest">Prev</button>
+              <div className="flex items-center gap-1">
+                <button className="w-8 h-8 rounded-lg bg-primary text-primary-foreground text-[10px] font-black">1</button>
+                <button className="w-8 h-8 rounded-lg bg-secondary text-foreground hover:bg-secondary/80 text-[10px] font-black transition-colors">2</button>
+              </div>
+              <button className="px-4 py-2 text-[10px] font-black text-primary hover:bg-primary/10 rounded-xl uppercase tracking-widest transition-all">Next</button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Add Exercise Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200">
-              <h3 className="text-xl font-semibold text-gray-900">Add New Exercise</h3>
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-card rounded-3xl border border-border max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="p-8 border-b border-border flex items-center justify-between bg-secondary/20">
+              <h3 className="text-2xl font-black text-foreground uppercase tracking-tight">Injection Protocol</h3>
+              <button 
+                onClick={() => setShowAddModal(false)}
+                className="p-2 hover:bg-secondary rounded-xl text-muted-foreground transition-all"
+              >
+                <XCircle className="w-6 h-6" />
+              </button>
             </div>
-            <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Exercise Name
-                </label>
+            <div className="p-8 space-y-8">
+              <div className="space-y-4">
+                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest pl-2">Movement Signature</label>
                 <input
                   type="text"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="e.g., Push-ups"
+                  className="w-full px-6 py-4 bg-secondary/50 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-bold"
+                  placeholder="e.g., ATOMIC PUSH-UPS"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description
-                </label>
+              
+              <div className="space-y-4">
+                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest pl-2">Protocol Description</label>
                 <textarea
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  rows={3}
-                  placeholder="Describe the exercise..."
+                  className="w-full px-6 py-4 bg-secondary/50 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium"
+                  rows={4}
+                  placeholder="Describe the anatomical impact and execution path..."
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Body Area
-                  </label>
-                  <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <option>Chest</option>
-                    <option>Back</option>
-                    <option>Legs</option>
-                    <option>Core</option>
-                    <option>Arms</option>
+
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest pl-2">Primary Anatomical Area</label>
+                  <select className="w-full px-6 py-4 bg-secondary/50 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-bold text-foreground cursor-pointer">
+                    <option>CHEST</option>
+                    <option>BACK</option>
+                    <option>LEGS</option>
+                    <option>CORE</option>
+                    <option>ARMS</option>
                   </select>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Equipment
-                  </label>
+                <div className="space-y-4">
+                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest pl-2">Required Equipment</label>
                   <input
                     type="text"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="e.g., Dumbbells"
+                    className="w-full px-6 py-4 bg-secondary/50 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-bold"
+                    placeholder="e.g., DUMBBELLS + BENCH"
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Sets</label>
+
+              <div className="grid grid-cols-3 gap-6">
+                <div className="space-y-4">
+                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest pl-2">VOLUME: SETS</label>
                   <input
                     type="text"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="3"
+                    className="w-full px-6 py-4 bg-secondary/50 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-black text-center"
+                    placeholder="4"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Reps</label>
+                <div className="space-y-4">
+                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest pl-2">VOLUME: REPS</label>
                   <input
                     type="text"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="10-15"
+                    className="w-full px-6 py-4 bg-secondary/50 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-black text-center"
+                    placeholder="12"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Duration
-                  </label>
+                <div className="space-y-4">
+                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest pl-2">TIME: DURATION</label>
                   <input
                     type="text"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="30s"
+                    className="w-full px-6 py-4 bg-secondary/50 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-black text-center"
+                    placeholder="60s"
                   />
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Video URL
-                </label>
+
+              <div className="space-y-4">
+                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest pl-2">Visual Data Link (Video URL)</label>
                 <input
                   type="url"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="https://youtube.com/..."
+                  className="w-full px-6 py-4 bg-secondary/50 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-bold"
+                  placeholder="https://content.bekfit.com/v/..."
                 />
               </div>
             </div>
-            <div className="p-6 border-t border-gray-200 flex justify-end gap-3">
+            <div className="p-8 border-t border-border flex justify-end gap-4 bg-secondary/20">
               <button
                 onClick={() => setShowAddModal(false)}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:bg-secondary rounded-2xl transition-all border border-border/50"
               >
-                Cancel
+                Abort
               </button>
               <button
                 onClick={() => setShowAddModal(false)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="px-10 py-4 bg-primary text-primary-foreground rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
               >
-                Add Exercise
+                COMMIT PROTOCOL
               </button>
             </div>
           </div>
