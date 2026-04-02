@@ -8,6 +8,7 @@ import { UserManagement } from '@/components/admin/UserManagement';
 import { PlanApprovalQueue } from '@/components/admin/PlanApprovalQueue';
 import { PlanTemplates } from '@/components/admin/PlanTemplates';
 import { Analytics } from '@/components/admin/Analytics';
+import { AIAgentManagement } from '@/components/admin/AIAgentManagement';
 import {
   LayoutDashboard,
   Dumbbell,
@@ -15,13 +16,14 @@ import {
   FileCheck,
   FileText,
   BarChart3,
+  Bot,
   Menu,
   X,
   LogOut,
   ChevronRight
 } from 'lucide-react';
 
-type View = 'dashboard' | 'exercises' | 'users' | 'approvals' | 'templates' | 'analytics';
+type View = 'dashboard' | 'exercises' | 'users' | 'approvals' | 'templates' | 'analytics' | 'ai_agents';
 
 function AdminContent() {
   const router = useRouter();
@@ -55,6 +57,7 @@ function AdminContent() {
     { id: 'approvals' as View, label: 'Plan Approvals', icon: FileCheck },
     { id: 'templates' as View, label: 'Plan Templates', icon: FileText },
     { id: 'analytics' as View, label: 'Analytics', icon: BarChart3 },
+    { id: 'ai_agents' as View, label: 'AI Agents', icon: Bot },
   ];
 
   if (!mounted) return null;
@@ -150,6 +153,7 @@ function AdminContent() {
             {currentTab === 'approvals' && <PlanApprovalQueue />}
             {currentTab === 'templates' && <PlanTemplates />}
             {currentTab === 'analytics' && <Analytics />}
+            {currentTab === 'ai_agents' && <AIAgentManagement />}
           </div>
         </main>
       </div>
