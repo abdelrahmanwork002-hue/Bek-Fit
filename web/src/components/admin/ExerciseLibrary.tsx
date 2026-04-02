@@ -1,7 +1,12 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Search, Plus, Edit2, Trash2, Play, Filter, Loader2, Dumbbell, XCircle } from 'lucide-react';
+import { 
+  Search, Plus, Edit2, Trash2, Play, Filter, 
+  Loader2, Dumbbell, XCircle, Archive, 
+  RefreshCcw, Eye, Save, Trash
+} from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { toast } from 'sonner';
 
 interface Exercise {
   id: string;
@@ -14,322 +19,322 @@ interface Exercise {
   reps: string;
   videoUrl: string;
   description: string;
-  usedInPlans: number;
+  status: 'Active' | 'Archived';
+  usedInPlans?: number;
 }
 
 export function ExerciseLibrary() {
+  const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterBodyArea, setFilterBodyArea] = useState('all');
   const [filterDifficulty, setFilterDifficulty] = useState('all');
-  const [showAddModal, setShowAddModal] = useState(false);
-
-  const [exercises, setExercises] = useState<Exercise[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [filterStatus, setFilterStatus] = useState<'Active' | 'Archived'>('Active');
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingExercise, setEditingExercise] = useState<Exercise | null>(null);
+  const [saving, setSaving] = useState(false);
+  
   const supabase = createClient();
 
   useEffect(() => {
-    async function fetchExercises() {
-      const { data, error } = await supabase
-        .from('exercises')
-        .select('*');
+    fetchExercises();
+  }, []);
 
-      if (error) {
-        console.error("Error fetching exercises:", error);
-      } else if (data) {
-        const liveExercises: Exercise[] = data.map((ex: any) => ({
+  async function fetchExercises() {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('exercises')
+      .select('*')
+      .order('id', { ascending: false });
+
+    if (error) {
+       toast.error("Failed to establish orbital link with exercise database.");
+    } else if (data) {
+       const formatted: Exercise[] = data.map((ex: any) => ({
           id: ex.id,
           name: ex.title,
-          bodyArea: 'Mixed', // Detailed categorization maps via Categories table
-          equipment: 'Variable',
+          bodyArea: ex.body_area || 'Mixed',
+          equipment: ex.equipment || 'Variable',
           difficulty: ex.difficulty || 'Intermediate',
-          duration: '45s',
+          duration: `${ex.duration_seconds || 45}s`,
           sets: String(ex.default_sets || 3),
           reps: String(ex.default_reps || 12),
           videoUrl: ex.video_url || '',
           description: ex.description || '',
-          usedInPlans: Math.floor(Math.random() * 50) + 1 // placeholder usage analytics
-        }));
-        setExercises(liveExercises);
-      }
-      setLoading(false);
+          status: (ex.status as any) || 'Active',
+          usedInPlans: Math.floor(Math.random() * 50) + 1 // placeholder simulation
+       }));
+       setExercises(formatted);
     }
-    fetchExercises();
-  }, [supabase]);
+    setLoading(false);
+  }
 
-  const filteredExercises = exercises.filter(exercise => {
-    const matchesSearch = exercise.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         exercise.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesBodyArea = filterBodyArea === 'all' || exercise.bodyArea === filterBodyArea;
-    const matchesDifficulty = filterDifficulty === 'all' || exercise.difficulty === filterDifficulty;
-    return matchesSearch && matchesBodyArea && matchesDifficulty;
+  const filteredExercises = exercises.filter(ex => {
+    const matchesSearch = ex.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          ex.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesArea = filterBodyArea === 'all' || ex.bodyArea === filterBodyArea;
+    const matchesDiff = filterDifficulty === 'all' || ex.difficulty === filterDifficulty;
+    const matchesStatus = ex.status === filterStatus;
+    return matchesSearch && matchesArea && matchesDiff && matchesStatus;
   });
+
+  const handleArchive = async (ex: Exercise) => {
+     const newStatus = ex.status === 'Active' ? 'Archived' : 'Active';
+     const { error } = await supabase.from('exercises').update({ status: newStatus }).eq('id', ex.id);
+     if (error) {
+        toast.error(`System Protocol Failure: Could not ${newStatus.toLowerCase()} target.`);
+     } else {
+        toast.success(`Protocol ${ex.name} has been ${newStatus === 'Archived' ? 'archived' : 'restored'}.`);
+        setExercises(prev => prev.map(p => p.id === ex.id ? { ...p, status: newStatus } : p));
+     }
+  };
+
+  const handleDelete = async (ex: Exercise) => {
+     if (!confirm(`CRITICAL OVERRIDE: Are you sure you want to PERMANENTLY SCRUB ${ex.name}? This cannot be undone.`)) return;
+     const { error } = await supabase.from('exercises').delete().eq('id', ex.id);
+     if (error) {
+        toast.error("Scrub failure: Database rejected deletion.");
+     } else {
+        toast.error(`Protocol ${ex.name} scrubbed.`);
+        setExercises(prev => prev.filter(p => p.id !== ex.id));
+     }
+  };
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
         <div>
-          <h2 className="text-3xl font-black text-foreground tracking-tight uppercase">EXERCISE <span className="text-primary underline decoration-primary/30 underline-offset-8">LIBRARY</span></h2>
-          <p className="text-muted-foreground mt-3 font-medium">Manage human optimization protocols and movement patterns.</p>
+           <h2 className="text-3xl font-black text-foreground tracking-tight uppercase">EXERCISE <span className="text-primary underline decoration-primary/30 underline-offset-8">PROTOCOLS</span></h2>
+           <p className="text-muted-foreground mt-3 font-medium">Configure human optimization patterns and anatomical stimulation modules.</p>
         </div>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-2xl font-black shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all text-xs uppercase tracking-widest"
-        >
-          <Plus className="w-4 h-4" />
-          Inject Protocol
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+           <div className="bg-secondary/50 p-1 rounded-xl border border-border/50 flex gap-1">
+             <button onClick={() => setFilterStatus('Active')} className={`px-4 py-2 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${filterStatus === 'Active' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}>Live</button>
+             <button onClick={() => setFilterStatus('Archived')} className={`px-4 py-2 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${filterStatus === 'Archived' ? 'bg-destructive text-destructive-foreground' : 'text-muted-foreground'}`}>Archived</button>
+           </div>
+           <button onClick={() => { setEditingExercise(null); setIsModalOpen(true); }} className="flex items-center gap-3 px-8 py-4 bg-primary text-primary-foreground rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all">
+              <Plus className="w-4 h-4" />
+              Inject Protocol
+           </button>
+        </div>
       </div>
 
-      {/* Search and Filters */}
+      {/* Control Deck */}
       <div className="bg-card rounded-3xl border border-border p-6 shadow-sm">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <div className="md:col-span-2 relative group">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
             <input
               type="text"
-              placeholder="Search exercise database..."
+              placeholder="Search kinetic database..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-12 pr-4 py-3 bg-secondary/50 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium"
             />
           </div>
 
-          <select
-            value={filterBodyArea}
-            onChange={(e) => setFilterBodyArea(e.target.value)}
-            className="px-4 py-3 bg-secondary/50 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-bold text-foreground cursor-pointer"
-          >
-            <option value="all">ALL BODY AREAS</option>
-            <option value="Chest">CHEST</option>
-            <option value="Back">BACK</option>
-            <option value="Legs">LEGS</option>
-            <option value="Core">CORE</option>
-            <option value="Arms">ARMS</option>
+          <select value={filterBodyArea} onChange={(e) => setFilterBodyArea(e.target.value)} className="px-4 py-3 bg-secondary/50 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-[10px] font-black text-foreground cursor-pointer uppercase tracking-widest">
+            <option value="all">ALL ANATOMICAL AREAS</option>
+            {['Chest', 'Back', 'Legs', 'Core', 'Arms', 'Shoulders'].map(a => <option key={a} value={a}>{a.toUpperCase()}</option>)}
           </select>
 
-          <select
-            value={filterDifficulty}
-            onChange={(e) => setFilterDifficulty(e.target.value)}
-            className="px-4 py-3 bg-secondary/50 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-bold text-foreground cursor-pointer"
-          >
-            <option value="all">ALL DIFFICULTIES</option>
-            <option value="Beginner">BEGINNER</option>
-            <option value="Intermediate">INTERMEDIATE</option>
-            <option value="Advanced">ADVANCED</option>
+          <select value={filterDifficulty} onChange={(e) => setFilterDifficulty(e.target.value)} className="px-4 py-3 bg-secondary/50 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-[10px] font-black text-foreground cursor-pointer uppercase tracking-widest">
+            <option value="all">ALL COMPLEXITY LEVELS</option>
+            {['Beginner', 'Intermediate', 'Advanced'].map(d => <option key={d} value={d.toLowerCase()}>{d.toUpperCase()}</option>)}
           </select>
         </div>
       </div>
 
-      {/* Exercise List */}
+      {/* Database Display */}
       {loading ? (
-        <div className="bg-card rounded-3xl border border-border p-20 flex flex-col items-center justify-center text-muted-foreground gap-6 shadow-sm">
-           <div className="relative">
-              <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-              <Loader2 className="w-6 h-6 text-primary absolute inset-0 m-auto animate-pulse" />
-           </div>
-           <div className="text-center">
-              <p className="font-black uppercase tracking-[0.3em] text-foreground text-sm">Synchronizing Library</p>
-              <p className="text-xs font-bold mt-2 opacity-60">Downloading protocol patterns from cloud storage...</p>
-           </div>
-        </div>
+         <div className="bg-card rounded-3xl border border-border p-20 flex flex-col items-center justify-center gap-4 text-center">
+            <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground animate-pulse">Syncing Kinetic Library...</p>
+         </div>
       ) : (
-        <div className="space-y-4">
-          <div className="bg-card rounded-3xl border border-border overflow-hidden shadow-sm">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-secondary/30 border-b border-border">
-                    {[
-                      'Movement Pattern', 'Anatomical Area', 'Equipment', 'Complexity', 'Volume Protocol', 'Deployment Count', 'Operations'
-                    ].map((head) => (
-                      <th key={head} className="px-8 py-5 text-left text-[10px] font-black text-muted-foreground uppercase tracking-widest whitespace-nowrap">
-                        {head}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border/50">
-                  {filteredExercises.map((exercise) => (
-                    <tr key={exercise.id} className="hover:bg-secondary/40 transition-all group cursor-default">
-                      <td className="px-8 py-6">
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-inner">
-                            <Dumbbell className="w-5 h-5" />
-                          </div>
-                          <div>
-                            <p className="font-black text-foreground uppercase tracking-tight">{exercise.name}</p>
-                            <p className="text-[10px] font-bold text-muted-foreground opacity-60 mt-0.5 uppercase tracking-widest leading-none line-clamp-1 max-w-[200px]">{exercise.description}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-8 py-6">
-                        <span className="text-xs font-black text-foreground uppercase tracking-widest bg-secondary/80 px-3 py-1.5 rounded-lg border border-border/30">
-                          {exercise.bodyArea}
-                        </span>
-                      </td>
-                      <td className="px-8 py-6 text-xs font-bold text-muted-foreground uppercase tracking-wider">{exercise.equipment}</td>
-                      <td className="px-8 py-6">
-                        <span
-                          className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.1em] rounded-lg border ${
-                            exercise.difficulty === 'Beginner'
-                              ? 'bg-green-500/10 text-green-500 border-green-500/20'
-                              : exercise.difficulty === 'Intermediate'
-                              ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
-                              : 'bg-red-500/10 text-red-500 border-red-500/20'
-                          }`}
-                        >
-                          {exercise.difficulty}
-                        </span>
-                      </td>
-                      <td className="px-8 py-6 text-xs font-black text-foreground uppercase tracking-widest">
-                        {exercise.sets} × {exercise.reps}
-                      </td>
-                      <td className="px-8 py-6 text-xs font-black text-muted-foreground uppercase tracking-widest opacity-60">
-                         {exercise.usedInPlans} DEPLOYED
-                      </td>
-                      <td className="px-8 py-6">
-                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button className="p-2 text-primary hover:bg-primary/10 rounded-xl transition-all active:scale-90 border border-primary/10 bg-primary/5">
-                            <Play className="w-4 h-4" />
-                          </button>
-                          <button className="p-2 text-foreground/60 hover:bg-secondary rounded-xl transition-all active:scale-90 border border-border/50">
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                          <button className="p-2 text-destructive hover:bg-destructive/10 rounded-xl transition-all active:scale-90 border border-destructive/10">
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
+        <div className="bg-card rounded-3xl border border-border overflow-hidden shadow-sm">
+           <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                 <thead>
+                    <tr className="bg-secondary/30 border-b border-border">
+                       {['Protocol Identity', 'Anatomical Zone', 'Module Specs', 'Volume', 'Operations'].map((h) => (
+                          <th key={h} className="px-8 py-5 text-[10px] font-black text-muted-foreground uppercase tracking-widest">{h}</th>
+                       ))}
                     </tr>
-                  ))}
-                </tbody>
+                 </thead>
+                 <tbody className="divide-y divide-border/50">
+                    {filteredExercises.map((ex) => (
+                       <tr key={ex.id} className="hover:bg-secondary/40 transition-all group border-l-4 border-transparent hover:border-primary/40">
+                          <td className="px-8 py-6">
+                             <div className="flex items-center gap-4">
+                                <div className="p-3 bg-secondary rounded-xl text-primary group-hover:scale-110 transition-transform"><Dumbbell className="w-5 h-5" /></div>
+                                <div>
+                                   <p className="font-black text-foreground uppercase tracking-tight">{ex.name}</p>
+                                   <p className="text-[10px] font-bold text-muted-foreground opacity-60 mt-1 uppercase tracking-widest line-clamp-1 max-w-[200px]">{ex.description}</p>
+                                </div>
+                             </div>
+                          </td>
+                          <td className="px-8 py-6">
+                             <span className="text-[8px] font-black text-foreground uppercase tracking-widest bg-secondary/80 px-2 py-1 rounded border border-border/30">{ex.bodyArea}</span>
+                          </td>
+                          <td className="px-8 py-6">
+                             <div className="space-y-1">
+                                <p className="text-[10px] font-black text-foreground uppercase tracking-widest">{ex.equipment}</p>
+                                <p className={`text-[8px] font-bold uppercase tracking-widest ${ex.difficulty.toLowerCase() === 'advanced' ? 'text-red-500' : 'text-primary'}`}>{ex.difficulty}</p>
+                             </div>
+                          </td>
+                          <td className="px-8 py-6">
+                             <p className="text-sm font-black text-foreground">{ex.sets} × {ex.reps}</p>
+                             <p className="text-[10px] font-bold text-muted-foreground opacity-60 uppercase">{ex.duration}</p>
+                          </td>
+                          <td className="px-8 py-6">
+                             <div className="flex items-center gap-2">
+                                <button onClick={() => { setEditingExercise(ex); setIsModalOpen(true); }} className="p-2.5 bg-secondary text-muted-foreground hover:bg-primary/10 hover:text-primary rounded-xl border border-transparent hover:border-primary/20 transition-all"><Edit2 className="w-4 h-4" /></button>
+                                <button onClick={() => handleArchive(ex)} title={ex.status === 'Active' ? 'Archive' : 'Restore'} className="p-2.5 bg-secondary text-muted-foreground hover:bg-yellow-500/10 hover:text-yellow-500 rounded-xl border border-transparent hover:border-yellow-500/20 transition-all">
+                                   {ex.status === 'Active' ? <Archive className="w-4 h-4" /> : <RefreshCcw className="w-4 h-4" />}
+                                </button>
+                                {ex.status === 'Archived' && (
+                                   <button onClick={() => handleDelete(ex)} className="p-2.5 bg-secondary text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-xl border border-transparent hover:border-destructive/20 transition-all"><Trash2 className="w-4 h-4" /></button>
+                                )}
+                             </div>
+                          </td>
+                       </tr>
+                    ))}
+                 </tbody>
               </table>
-            </div>
-          </div>
-
-          {/* Pagination UI */}
-          <div className="flex items-center justify-between px-2 pt-2">
-            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60">
-              Showing 1-20 of {exercises.length} protocols
-            </p>
-            <div className="flex items-center gap-2">
-              <button className="px-4 py-2 text-[10px] font-black text-muted-foreground opacity-30 cursor-not-allowed uppercase tracking-widest">Prev</button>
-              <div className="flex items-center gap-1">
-                <button className="w-8 h-8 rounded-lg bg-primary text-primary-foreground text-[10px] font-black">1</button>
-                <button className="w-8 h-8 rounded-lg bg-secondary text-foreground hover:bg-secondary/80 text-[10px] font-black transition-colors">2</button>
-              </div>
-              <button className="px-4 py-2 text-[10px] font-black text-primary hover:bg-primary/10 rounded-xl uppercase tracking-widest transition-all">Next</button>
-            </div>
-          </div>
+           </div>
         </div>
       )}
 
-      {/* Add Exercise Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in zoom-in-95 duration-200">
-          <div className="bg-card rounded-3xl border border-border max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-            <div className="p-8 border-b border-border flex items-center justify-between bg-secondary/20">
-              <h3 className="text-2xl font-black text-foreground uppercase tracking-tight">Injection Protocol</h3>
-              <button 
-                onClick={() => setShowAddModal(false)}
-                className="p-2 hover:bg-secondary rounded-xl text-muted-foreground transition-all"
-              >
-                <XCircle className="w-6 h-6" />
-              </button>
-            </div>
-            <div className="p-8 space-y-8">
-              <div className="space-y-4">
-                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest pl-2">Movement Signature</label>
-                <input
-                  type="text"
-                  className="w-full px-6 py-4 bg-secondary/50 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-bold"
-                  placeholder="e.g., ATOMIC PUSH-UPS"
-                />
-              </div>
-              
-              <div className="space-y-4">
-                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest pl-2">Protocol Description</label>
-                <textarea
-                  className="w-full px-6 py-4 bg-secondary/50 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium"
-                  rows={4}
-                  placeholder="Describe the anatomical impact and execution path..."
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest pl-2">Primary Anatomical Area</label>
-                  <select className="w-full px-6 py-4 bg-secondary/50 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-bold text-foreground cursor-pointer">
-                    <option>CHEST</option>
-                    <option>BACK</option>
-                    <option>LEGS</option>
-                    <option>CORE</option>
-                    <option>ARMS</option>
-                  </select>
-                </div>
-                <div className="space-y-4">
-                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest pl-2">Required Equipment</label>
-                  <input
-                    type="text"
-                    className="w-full px-6 py-4 bg-secondary/50 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-bold"
-                    placeholder="e.g., DUMBBELLS + BENCH"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-6">
-                <div className="space-y-4">
-                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest pl-2">VOLUME: SETS</label>
-                  <input
-                    type="text"
-                    className="w-full px-6 py-4 bg-secondary/50 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-black text-center"
-                    placeholder="4"
-                  />
-                </div>
-                <div className="space-y-4">
-                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest pl-2">VOLUME: REPS</label>
-                  <input
-                    type="text"
-                    className="w-full px-6 py-4 bg-secondary/50 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-black text-center"
-                    placeholder="12"
-                  />
-                </div>
-                <div className="space-y-4">
-                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest pl-2">TIME: DURATION</label>
-                  <input
-                    type="text"
-                    className="w-full px-6 py-4 bg-secondary/50 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-black text-center"
-                    placeholder="60s"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest pl-2">Visual Data Link (Video URL)</label>
-                <input
-                  type="url"
-                  className="w-full px-6 py-4 bg-secondary/50 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-bold"
-                  placeholder="https://content.bekfit.com/v/..."
-                />
-              </div>
-            </div>
-            <div className="p-8 border-t border-border flex justify-end gap-4 bg-secondary/20">
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:bg-secondary rounded-2xl transition-all border border-border/50"
-              >
-                Abort
-              </button>
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="px-10 py-4 bg-primary text-primary-foreground rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
-              >
-                COMMIT PROTOCOL
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* Modal Interface */}
+      {isModalOpen && (
+         <ExerciseFormModal 
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            exercise={editingExercise}
+            onSuccess={fetchExercises}
+            supabase={supabase}
+         />
       )}
     </div>
   );
+}
+
+function ExerciseFormModal({ isOpen, onClose, exercise, onSuccess, supabase }: any) {
+   const [saving, setSaving] = useState(false);
+   const [formData, setFormData] = useState({
+      title: exercise?.name || '',
+      description: exercise?.description || '',
+      body_area: exercise?.bodyArea || 'Chest',
+      equipment: exercise?.equipment || 'Dumbbells',
+      difficulty: exercise?.difficulty || 'intermediate',
+      default_sets: exercise?.sets || '3',
+      default_reps: exercise?.reps || '12',
+      duration_seconds: exercise?.duration?.replace('s', '') || '60',
+      video_url: exercise?.videoUrl || ''
+   });
+
+   const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      setSaving(true);
+      try {
+         const payload = {
+            ...formData,
+            default_sets: parseInt(formData.default_sets),
+            default_reps: parseInt(formData.default_reps),
+            duration_seconds: parseInt(formData.duration_seconds),
+            updated_at: new Date().toISOString()
+         };
+
+         if (exercise) {
+            const { error } = await supabase.from('exercises').update(payload).eq('id', exercise.id);
+            if (error) throw error;
+            toast.success("Protocol updated successfully.");
+         } else {
+            const { error } = await supabase.from('exercises').insert([payload]);
+            if (error) throw error;
+            toast.success("New protocol successfully injected.");
+         }
+         onSuccess();
+         onClose();
+      } catch (err: any) {
+         toast.error(`Injection Failure: ${err.message}`);
+      } finally {
+         setSaving(false);
+      }
+   };
+
+   return (
+      <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in zoom-in-95 duration-200">
+         <div className="bg-card rounded-3xl border border-border max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative">
+            <button onClick={onClose} className="absolute top-6 right-6 p-2 hover:bg-secondary rounded-xl text-muted-foreground transition-colors"><XCircle className="w-6 h-6" /></button>
+            <form onSubmit={handleSubmit} className="p-10 space-y-8">
+               <div>
+                  <h3 className="text-2xl font-black text-foreground uppercase tracking-tight">{exercise ? 'Configure Protocol' : 'Initial Injection'}</h3>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mt-2 opacity-60">Defining Anatomical Impact Patterns</p>
+               </div>
+
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                     <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Protocol Title</label>
+                     <input required value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="w-full px-4 py-3 bg-secondary/50 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 outline-none font-bold" placeholder="e.g. DUMBBELL PUSH PRESS" />
+                  </div>
+                  <div className="space-y-2">
+                     <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Target Zone</label>
+                     <select value={formData.body_area} onChange={(e) => setFormData({ ...formData, body_area: e.target.value })} className="w-full px-4 py-3 bg-secondary/50 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 outline-none font-bold">
+                        {['Chest', 'Back', 'Legs', 'Core', 'Arms', 'Shoulders'].map(a => <option key={a} value={a}>{a.toUpperCase()}</option>)}
+                     </select>
+                  </div>
+               </div>
+
+               <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Anatomical Strategy (Description)</label>
+                  <textarea rows={3} value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className="w-full px-4 py-3 bg-secondary/50 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 outline-none font-medium text-sm" placeholder="Describe the execution pathway..." />
+               </div>
+
+               <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                     <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Equipment</label>
+                     <input value={formData.equipment} onChange={(e) => setFormData({ ...formData, equipment: e.target.value })} className="w-full px-4 py-3 bg-secondary/50 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 outline-none font-bold" />
+                  </div>
+                  <div className="space-y-2">
+                     <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Complexity</label>
+                     <select value={formData.difficulty} onChange={(e) => setFormData({ ...formData, difficulty: e.target.value })} className="w-full px-4 py-3 bg-secondary/50 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 outline-none font-bold uppercase">
+                        {['beginner', 'intermediate', 'advanced'].map(d => <option key={d} value={d}>{d}</option>)}
+                     </select>
+                  </div>
+               </div>
+
+               <div className="grid grid-cols-3 gap-6">
+                  <div className="space-y-2">
+                     <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-center block">Sets</label>
+                     <input type="number" value={formData.default_sets} onChange={(e) => setFormData({ ...formData, default_sets: e.target.value })} className="w-full px-4 py-3 bg-secondary/50 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 outline-none text-center font-black" />
+                  </div>
+                  <div className="space-y-2">
+                     <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-center block">Reps</label>
+                     <input type="number" value={formData.default_reps} onChange={(e) => setFormData({ ...formData, default_reps: e.target.value })} className="w-full px-4 py-3 bg-secondary/50 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 outline-none text-center font-black" />
+                  </div>
+                  <div className="space-y-2">
+                     <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-center block">Secs</label>
+                     <input type="number" value={formData.duration_seconds} onChange={(e) => setFormData({ ...formData, duration_seconds: e.target.value })} className="w-full px-4 py-3 bg-secondary/50 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 outline-none text-center font-black" />
+                  </div>
+               </div>
+
+               <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Video Data Link</label>
+                  <input type="url" value={formData.video_url} onChange={(e) => setFormData({ ...formData, video_url: e.target.value })} className="w-full px-4 py-3 bg-secondary/50 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 outline-none font-bold" placeholder="https://..." />
+               </div>
+
+               <div className="flex gap-4 pt-4">
+                  <button type="button" onClick={onClose} className="flex-1 py-4 bg-secondary text-foreground/60 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-secondary/80 transition-all">Abort</button>
+                  <button type="submit" disabled={saving} className="flex-[2] py-4 bg-primary text-primary-foreground rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3">
+                     {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                     {exercise ? 'Update Registry' : 'Commit to Registry'}
+                  </button>
+               </div>
+            </form>
+         </div>
+      </div>
+   );
 }
