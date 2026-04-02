@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Eye, CheckCircle, XCircle, AlertTriangle, Edit2, Loader2, Calendar, Activity, Zap } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { toast } from 'sonner';
 
 interface PendingPlan {
   id: string;
@@ -73,6 +74,39 @@ export function PlanApprovalQueue() {
     }
     fetchQueue();
   }, [supabase]);
+
+  const handleApprovePlan = async (planId: string) => {
+    // Note: planId in this component is actually the userId (from the fetch mapping)
+    // We update the associated plan
+    const { error } = await supabase
+      .from('plans')
+      .update({ is_active: true, status: 'active' })
+      .eq('user_id', planId);
+
+    if (error) {
+      toast.error('Failed to validate movement protocol.');
+      console.error(error);
+    } else {
+      toast.success('Protocol validated. User deployment active.');
+      setPlans(prev => prev.map(p => p.id === planId ? { ...p, status: 'approved' } : p));
+      if (selectedPlan?.id === planId) setSelectedPlan(null);
+    }
+  };
+
+  const handleRejectPlan = async (planId: string) => {
+    const { error } = await supabase
+      .from('plans')
+      .delete() // Or update status to 'rejected'
+      .eq('user_id', planId);
+
+    if (error) {
+      toast.error('Failed to deny module.');
+    } else {
+      toast.error('Protocol denied. Module purged from queue.');
+      setPlans(prev => prev.map(p => p.id === planId ? { ...p, status: 'rejected' } : p));
+      if (selectedPlan?.id === planId) setSelectedPlan(null);
+    }
+  };
 
   const filteredPlans = plans.filter(plan =>
     filterStatus === 'all' || plan.status === filterStatus
@@ -195,7 +229,10 @@ export function PlanApprovalQueue() {
                 </button>
                 {plan.status === 'pending' && (
                   <>
-                    <button className="flex-1 lg:flex-none flex items-center justify-center gap-3 px-8 py-4 bg-card border border-border hover:border-green-500/50 hover:bg-green-500/10 text-foreground/60 hover:text-green-500 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all">
+                    <button 
+                      onClick={() => handleApprovePlan(plan.id)}
+                      className="flex-1 lg:flex-none flex items-center justify-center gap-3 px-8 py-4 bg-card border border-border hover:border-green-500/50 hover:bg-green-500/10 text-foreground/60 hover:text-green-500 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all"
+                    >
                       <CheckCircle className="w-4 h-4" />
                       Quick Approve
                     </button>
@@ -305,11 +342,17 @@ export function PlanApprovalQueue() {
                   <Edit2 className="w-4 h-4" />
                   Override Protocol
                 </button>
-                <button className="flex-1 flex items-center justify-center gap-3 px-8 py-5 bg-primary text-primary-foreground rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-2xl shadow-primary/30 hover:scale-105 active:scale-95 transition-all">
+                <button 
+                  onClick={() => handleApprovePlan(selectedPlan.id)}
+                  className="flex-1 flex items-center justify-center gap-3 px-8 py-5 bg-primary text-primary-foreground rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-2xl shadow-primary/30 hover:scale-105 active:scale-95 transition-all"
+                >
                   <CheckCircle className="w-4 h-4" />
                   Validate & Commit
                 </button>
-                <button className="flex-1 flex items-center justify-center gap-3 px-8 py-5 bg-destructive/10 text-destructive border border-destructive/20 rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-destructive hover:text-white transition-all">
+                <button 
+                  onClick={() => handleRejectPlan(selectedPlan.id)}
+                  className="flex-1 flex items-center justify-center gap-3 px-8 py-5 bg-destructive/10 text-destructive border border-destructive/20 rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-destructive hover:text-white transition-all"
+                >
                   <XCircle className="w-4 h-4" />
                   Deny Module
                 </button>

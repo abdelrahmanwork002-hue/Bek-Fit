@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Search, Eye, CheckCircle, XCircle, Clock, Loader2, Users, FileCheck } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { toast } from 'sonner';
 
 interface User {
   id: string;
@@ -80,6 +81,47 @@ export function UserManagement() {
 
     fetchUsers();
   }, [supabase]);
+
+  const handlePaymentUpdate = async (userId: string, currentStatus: string) => {
+    const newStatus = 'active';
+    const { error } = await supabase
+      .from('payments')
+      .update({ status: newStatus, processed_at: new Date().toISOString() })
+      .eq('user_id', userId);
+
+    if (error) {
+      toast.error('Failed to validate payment protocol.');
+      console.error(error);
+    } else {
+      toast.success('Payment protocol validated. User access restored.');
+      // Refresh user locally
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, paymentStatus: newStatus } : u));
+      if (selectedUser?.id === userId) setSelectedUser(prev => prev ? { ...prev, paymentStatus: newStatus } : null);
+    }
+  };
+
+  const handleSuspendAccess = async (userId: string) => {
+    const newStatus = 'expired';
+    const { error } = await supabase
+      .from('payments')
+      .update({ status: newStatus })
+      .eq('user_id', userId);
+
+    if (error) {
+      toast.error('Failed to suspend user access.');
+      console.error(error);
+    } else {
+      toast.warning('Access protocol suspended. Identity restricted.');
+      // Refresh user locally
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, paymentStatus: newStatus } : u));
+      if (selectedUser?.id === userId) setSelectedUser(prev => prev ? { ...prev, paymentStatus: newStatus } : null);
+    }
+  };
+
+  const handleOverrideProgram = () => {
+    toast.info('Overriding protocol session... Redirecting to architecture terminal.');
+    // In a real app, this would probably navigate to the exercise library with the user's ID
+  };
 
   const filteredUsers = users.filter((user) => {
     const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -373,10 +415,18 @@ export function UserManagement() {
                       </div>
                     </div>
                     <div className="flex gap-3 w-full sm:w-auto">
-                      <button className="flex-1 sm:flex-none px-6 py-4 bg-primary text-primary-foreground rounded-2xl text-xs font-black uppercase tracking-[0.15em] shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all">
-                        Validate Payment
+                      <button 
+                        onClick={() => handlePaymentUpdate(selectedUser.id, selectedUser.paymentStatus)}
+                        disabled={selectedUser.paymentStatus === 'active'}
+                        className="flex-1 sm:flex-none px-6 py-4 bg-primary text-primary-foreground rounded-2xl text-xs font-black uppercase tracking-[0.15em] shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:hover:scale-100"
+                      >
+                        {selectedUser.paymentStatus === 'active' ? 'Payment Verified' : 'Validate Payment'}
                       </button>
-                      <button className="flex-1 sm:flex-none px-6 py-4 bg-destructive/10 text-destructive border border-destructive/20 rounded-2xl text-xs font-black uppercase tracking-[0.15em] hover:bg-destructive hover:text-white transition-all">
+                      <button 
+                        onClick={() => handleSuspendAccess(selectedUser.id)}
+                        disabled={selectedUser.paymentStatus === 'expired'}
+                        className="flex-1 sm:flex-none px-6 py-4 bg-destructive/10 text-destructive border border-destructive/20 rounded-2xl text-xs font-black uppercase tracking-[0.15em] hover:bg-destructive hover:text-white transition-all disabled:opacity-50"
+                      >
                         Suspend Access
                       </button>
                     </div>
@@ -399,7 +449,10 @@ export function UserManagement() {
                       </p>
                     </div>
                   </div>
-                  <button className="w-full sm:w-auto px-8 py-4 border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground rounded-2xl text-sm font-black uppercase tracking-widest transition-all shadow-lg shadow-primary/5">
+                  <button 
+                    onClick={handleOverrideProgram}
+                    className="w-full sm:w-auto px-8 py-4 border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground rounded-2xl text-sm font-black uppercase tracking-widest transition-all shadow-lg shadow-primary/5 active:scale-95"
+                  >
                     OVERRIDE PROGRAM
                   </button>
                 </div>
