@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 interface Exercise {
   id: string;
   name: string;
+  category: 'Gym' | 'Yoga' | 'Calisthenics';
   bodyArea: string;
   equipment: string;
   difficulty: string;
@@ -27,6 +28,7 @@ export function ExerciseLibrary() {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterCategory, setFilterCategory] = useState('all');
   const [filterBodyArea, setFilterBodyArea] = useState('all');
   const [filterDifficulty, setFilterDifficulty] = useState('all');
   const [filterStatus, setFilterStatus] = useState<'Active' | 'Archived'>('Active');
@@ -54,6 +56,7 @@ export function ExerciseLibrary() {
        const formatted: Exercise[] = data.map((ex: any) => ({
           id: ex.id,
           name: ex.title,
+          category: (ex.category as any) || 'Gym',
           bodyArea: ex.body_area || 'Mixed',
           equipment: ex.equipment || 'Variable',
           difficulty: ex.difficulty || 'Intermediate',
@@ -73,10 +76,11 @@ export function ExerciseLibrary() {
   const filteredExercises = exercises.filter(ex => {
     const matchesSearch = ex.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           ex.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = filterCategory === 'all' || ex.category === filterCategory;
     const matchesArea = filterBodyArea === 'all' || ex.bodyArea === filterBodyArea;
     const matchesDiff = filterDifficulty === 'all' || ex.difficulty === filterDifficulty;
     const matchesStatus = ex.status === filterStatus;
-    return matchesSearch && matchesArea && matchesDiff && matchesStatus;
+    return matchesSearch && matchesCategory && matchesArea && matchesDiff && matchesStatus;
   });
 
   const handleArchive = async (ex: Exercise) => {
@@ -122,25 +126,30 @@ export function ExerciseLibrary() {
 
       {/* Control Deck */}
       <div className="bg-card rounded-3xl border border-border p-6 shadow-sm">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="md:col-span-2 relative group">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+          <div className="md:col-span-1 relative group">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
             <input
               type="text"
-              placeholder="Search kinetic database..."
+              placeholder="Search..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-12 pr-4 py-3 bg-secondary/50 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium"
             />
           </div>
 
+          <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} className="px-4 py-3 bg-secondary/50 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-[10px] font-black text-foreground cursor-pointer uppercase tracking-widest">
+            <option value="all">ALL CATEGORIES</option>
+            {['Gym', 'Yoga', 'Calisthenics'].map(c => <option key={c} value={c}>{c.toUpperCase()}</option>)}
+          </select>
+
           <select value={filterBodyArea} onChange={(e) => setFilterBodyArea(e.target.value)} className="px-4 py-3 bg-secondary/50 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-[10px] font-black text-foreground cursor-pointer uppercase tracking-widest">
-            <option value="all">ALL ANATOMICAL AREAS</option>
+            <option value="all">ANATOMICAL AREAS</option>
             {['Chest', 'Back', 'Legs', 'Core', 'Arms', 'Shoulders'].map(a => <option key={a} value={a}>{a.toUpperCase()}</option>)}
           </select>
 
           <select value={filterDifficulty} onChange={(e) => setFilterDifficulty(e.target.value)} className="px-4 py-3 bg-secondary/50 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-[10px] font-black text-foreground cursor-pointer uppercase tracking-widest">
-            <option value="all">ALL COMPLEXITY LEVELS</option>
+            <option value="all">COMPLEXITY</option>
             {['Beginner', 'Intermediate', 'Advanced'].map(d => <option key={d} value={d.toLowerCase()}>{d.toUpperCase()}</option>)}
           </select>
         </div>
@@ -158,7 +167,7 @@ export function ExerciseLibrary() {
               <table className="w-full text-left">
                  <thead>
                     <tr className="bg-secondary/30 border-b border-border">
-                       {['Protocol Identity', 'Anatomical Zone', 'Module Specs', 'Volume', 'Operations'].map((h) => (
+                       {['Identity', 'Category', 'Anatomy', 'Module Specs', 'Volume', 'Operations'].map((h) => (
                           <th key={h} className="px-8 py-5 text-[10px] font-black text-muted-foreground uppercase tracking-widest">{h}</th>
                        ))}
                     </tr>
@@ -174,6 +183,9 @@ export function ExerciseLibrary() {
                                    <p className="text-[10px] font-bold text-muted-foreground opacity-60 mt-1 uppercase tracking-widest line-clamp-1 max-w-[200px]">{ex.description}</p>
                                 </div>
                              </div>
+                          </td>
+                          <td className="px-8 py-6">
+                             <span className="text-[8px] font-black text-primary border border-primary/20 bg-primary/5 px-3 py-1.5 rounded-lg uppercase tracking-widest whitespace-nowrap">{ex.category}</span>
                           </td>
                           <td className="px-8 py-6">
                              <span className="text-[8px] font-black text-foreground uppercase tracking-widest bg-secondary/80 px-2 py-1 rounded border border-border/30">{ex.bodyArea}</span>
@@ -225,6 +237,7 @@ function ExerciseFormModal({ isOpen, onClose, exercise, onSuccess, supabase }: a
    const [saving, setSaving] = useState(false);
    const [formData, setFormData] = useState({
       title: exercise?.name || '',
+      category: exercise?.category || 'Gym',
       description: exercise?.description || '',
       body_area: exercise?.bodyArea || 'Chest',
       equipment: exercise?.equipment || 'Dumbbells',
@@ -275,10 +288,16 @@ function ExerciseFormModal({ isOpen, onClose, exercise, onSuccess, supabase }: a
                   <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mt-2 opacity-60">Defining Anatomical Impact Patterns</p>
                </div>
 
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="space-y-2">
                      <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Protocol Title</label>
                      <input required value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="w-full px-4 py-3 bg-secondary/50 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 outline-none font-bold" placeholder="e.g. DUMBBELL PUSH PRESS" />
+                  </div>
+                  <div className="space-y-2">
+                     <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Category Strategy</label>
+                     <select value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} className="w-full px-4 py-3 bg-secondary/50 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 outline-none font-bold">
+                        {['Gym', 'Yoga', 'Calisthenics'].map(c => <option key={c} value={c}>{c.toUpperCase()}</option>)}
+                     </select>
                   </div>
                   <div className="space-y-2">
                      <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Target Zone</label>
