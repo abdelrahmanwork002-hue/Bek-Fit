@@ -172,8 +172,8 @@ export function ExerciseLibrary() {
           </select>
 
           <select value={filterBodyArea} onChange={(e) => setFilterBodyArea(e.target.value)} className="px-4 py-3 bg-secondary/50 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-[10px] font-black text-foreground cursor-pointer uppercase tracking-widest">
-            <option value="all">ANATOMICAL AREAS</option>
-            {['Chest', 'Back', 'Legs', 'Core', 'Arms', 'Shoulders'].map(a => <option key={a} value={a}>{a.toUpperCase()}</option>)}
+            <option value="all">TARGET MUSCLES</option>
+            {['Chest', 'Back', 'Quads', 'Glutes', 'Hamstrings', 'Calves', 'Shoulders', 'Bicep', 'Tricep', 'Core', 'Lats', 'Neck', 'Adductors'].map(a => <option key={a} value={a}>{a.toUpperCase()}</option>)}
           </select>
 
           <select value={filterDifficulty} onChange={(e) => setFilterDifficulty(e.target.value)} className="px-4 py-3 bg-secondary/50 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-[10px] font-black text-foreground cursor-pointer uppercase tracking-widest">
