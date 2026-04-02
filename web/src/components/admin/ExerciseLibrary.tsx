@@ -20,7 +20,7 @@ interface Exercise {
   id: string;
   name: string;
   category: 'Gym' | 'Yoga' | 'Calisthenics';
-  bodyArea: string;
+  target_muscles: string[];
   equipment: string;
   difficulty: string;
   duration: string;
@@ -68,7 +68,7 @@ export function ExerciseLibrary() {
           id: ex.id,
           name: ex.title,
           category: (ex.category as any) || 'Gym',
-          bodyArea: ex.body_area || 'Mixed',
+          target_muscles: ex.target_muscles || [ex.body_area] || [],
           equipment: ex.equipment || 'Variable',
           difficulty: ex.difficulty || 'Intermediate',
           duration: `${ex.duration_seconds || 45}s`,
@@ -88,7 +88,7 @@ export function ExerciseLibrary() {
     const matchesSearch = ex.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           ex.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = filterCategory === 'all' || ex.category === filterCategory;
-    const matchesArea = filterBodyArea === 'all' || ex.bodyArea === filterBodyArea;
+    const matchesArea = filterBodyArea === 'all' || ex.target_muscles.includes(filterBodyArea);
     const matchesDiff = filterDifficulty === 'all' || ex.difficulty === filterDifficulty;
     const matchesStatus = ex.status === filterStatus;
     return matchesSearch && matchesCategory && matchesArea && matchesDiff && matchesStatus;
@@ -216,7 +216,12 @@ export function ExerciseLibrary() {
                              <span className="text-[8px] font-black text-primary border border-primary/20 bg-primary/5 px-3 py-1.5 rounded-lg uppercase tracking-widest whitespace-nowrap">{ex.category}</span>
                           </td>
                           <td className="px-8 py-6">
-                             <span className="text-[8px] font-black text-foreground uppercase tracking-widest bg-secondary/80 px-2 py-1 rounded border border-border/30">{ex.bodyArea}</span>
+                             <div className="flex flex-wrap gap-1 max-w-[150px]">
+                                {ex.target_muscles.map((m, i) => (
+                                   <span key={i} className="text-[7px] font-black text-foreground uppercase tracking-widest bg-secondary/80 px-2 py-1 rounded border border-border/30 whitespace-nowrap">{m}</span>
+                                ))}
+                                {ex.target_muscles.length === 0 && <span className="text-[7px] opacity-30 uppercase font-black">Mixed</span>}
+                             </div>
                           </td>
                           <td className="px-8 py-6">
                              <div className="space-y-1">
@@ -454,7 +459,7 @@ function ExerciseFormModal({
       title: exercise?.name || '',
       category: exercise?.category || 'Gym',
       description: exercise?.description || '',
-      body_area: exercise?.bodyArea || 'Chest',
+      target_muscles: exercise?.target_muscles || [] as string[],
       equipment: exercise?.equipment || 'Dumbbells',
       difficulty: exercise?.difficulty || 'intermediate',
       default_sets: exercise?.sets || '3',
@@ -463,15 +468,33 @@ function ExerciseFormModal({
       video_url: exercise?.videoUrl || ''
    });
 
+   const muscleGroups = ['Chest', 'Back', 'Quads', 'Glutes', 'Hamstrings', 'Calves', 'Shoulders', 'Bicep', 'Tricep', 'Core', 'Lats', 'Neck', 'Adductors'];
+
+   const toggleMuscle = (muscle: string) => {
+      setFormData(prev => ({
+         ...prev,
+         target_muscles: prev.target_muscles.includes(muscle) 
+            ? prev.target_muscles.filter(m => m !== muscle) 
+            : [...prev.target_muscles, muscle]
+      }));
+   };
+
    const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
       setSaving(true);
       try {
          const payload = {
-            ...formData,
+            title: formData.title,
+            category: formData.category,
+            description: formData.description,
+            target_muscles: formData.target_muscles,
+            body_area: formData.target_muscles[0] || 'Mixed', // Maintain legacy for safety
+            equipment: formData.equipment,
+            difficulty: formData.difficulty,
             default_sets: parseInt(formData.default_sets),
             default_reps: parseInt(formData.default_reps),
             duration_seconds: parseInt(formData.duration_seconds),
+            video_url: formData.video_url,
             updated_at: new Date().toISOString()
          };
 
@@ -503,7 +526,7 @@ function ExerciseFormModal({
                   <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mt-2 opacity-60">Defining Anatomical Impact Patterns</p>
                </div>
 
-               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                      <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Protocol Title</label>
                      <input required value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="w-full px-4 py-3 bg-secondary/50 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 outline-none font-bold" placeholder="e.g. DUMBBELL PUSH PRESS" />
@@ -514,11 +537,21 @@ function ExerciseFormModal({
                         {['Gym', 'Yoga', 'Calisthenics'].map(c => <option key={c} value={c}>{c.toUpperCase()}</option>)}
                      </select>
                   </div>
-                  <div className="space-y-2">
-                     <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Target Zone</label>
-                     <select value={formData.body_area} onChange={(e) => setFormData({ ...formData, body_area: e.target.value })} className="w-full px-4 py-3 bg-secondary/50 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 outline-none font-bold">
-                        {['Chest', 'Back', 'Legs', 'Core', 'Arms', 'Shoulders'].map(a => <option key={a} value={a}>{a.toUpperCase()}</option>)}
-                     </select>
+               </div>
+
+               <div className="space-y-3">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground block ml-1">Kinetic Map: Target Muscle Groups (Multi-Select)</label>
+                  <div className="flex flex-wrap gap-2 p-4 bg-secondary/30 border border-border rounded-2xl min-h-[100px]">
+                     {muscleGroups.map(muscle => (
+                        <button
+                           key={muscle}
+                           type="button"
+                           onClick={() => toggleMuscle(muscle)}
+                           className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${formData.target_muscles.includes(muscle) ? 'bg-primary text-primary-foreground border-primary' : 'bg-secondary text-muted-foreground border-border hover:border-primary/30'}`}
+                        >
+                           {muscle}
+                        </button>
+                     ))}
                   </div>
                </div>
 
