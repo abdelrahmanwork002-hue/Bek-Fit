@@ -27,21 +27,20 @@ export default function Login() {
       
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const { data: adminRecord } = await supabase
-           .from('admins')
-           .select('id')
-           .eq('id', user.id)
-           .single();
+        // SEGREGATION GATE: Check identity roles
+        const { data: adminRecord } = await supabase.from('admins').select('id').eq('id', user.id).single();
+        const { data: userRecord } = await supabase.from('users').select('id').eq('id', user.id).single();
            
-        if (adminRecord) {
+        if (adminRecord && !userRecord) {
            await supabase.auth.signOut();
-           throw new Error("Administrators must authenticate via the restricted /admin/login terminal.");
+           setError("ADMINISTRATIVE IDENTITY: This account is restricted to administrative operations. please use /admin/login or create a client profile.");
+           setIsLoading(false);
+           return;
         }
       }
       
       window.location.href = '/home';
     } catch (err: any) {
-      alert(`Debug Error: ${err.message || 'Unknown error'}`);
       setError(err.message || 'Invalid email or password');
     } finally {
       setIsLoading(false);
