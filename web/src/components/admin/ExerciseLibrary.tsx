@@ -104,17 +104,6 @@ export function ExerciseLibrary() {
      }
   };
 
-  const handleDelete = async (ex: Exercise) => {
-     if (!confirm(`CRITICAL OVERRIDE: Are you sure you want to PERMANENTLY SCRUB ${ex.name}? This cannot be undone.`)) return;
-     const { error } = await supabase.from('exercises').delete().eq('id', ex.id);
-     if (error) {
-        toast.error("Scrub failure: Database rejected deletion.");
-     } else {
-        toast.error(`Protocol ${ex.name} scrubbed.`);
-        setExercises(prev => prev.filter(p => p.id !== ex.id));
-     }
-  };
-
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
@@ -241,12 +230,10 @@ export function ExerciseLibrary() {
                           <td className="px-8 py-6">
                              <div className="flex items-center gap-2">
                                 <button onClick={() => { setEditingExercise(ex); setIsModalOpen(true); }} className="p-2.5 bg-secondary text-muted-foreground hover:bg-primary/10 hover:text-primary rounded-xl border border-transparent hover:border-primary/20 transition-all"><Edit2 className="w-4 h-4" /></button>
-                                <button onClick={() => handleArchive(ex)} title={ex.status === 'Active' ? 'Archive' : 'Restore'} className="p-2.5 bg-secondary text-muted-foreground hover:bg-yellow-500/10 hover:text-yellow-500 rounded-xl border border-transparent hover:border-yellow-500/20 transition-all">
+                                <button onClick={() => handleArchive(ex)} title={ex.status === 'Active' ? 'Archive' : 'Restore'} className="p-2.5 bg-secondary text-muted-foreground hover:bg-yellow-500/10 hover:text-yellow-500 rounded-xl border border-transparent hover:border-yellow-500/20 transition-all flex items-center gap-2 pr-4">
                                    {ex.status === 'Active' ? <Archive className="w-4 h-4" /> : <RefreshCcw className="w-4 h-4" />}
+                                   <span className="text-[10px] font-black uppercase tracking-widest">{ex.status === 'Active' ? 'Archive' : 'Restore'}</span>
                                 </button>
-                                {ex.status === 'Archived' && (
-                                   <button onClick={() => handleDelete(ex)} className="p-2.5 bg-secondary text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-xl border border-transparent hover:border-destructive/20 transition-all"><Trash2 className="w-4 h-4" /></button>
-                                )}
                              </div>
                           </td>
                        </tr>
