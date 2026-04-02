@@ -1,0 +1,2264 @@
+Summary
+
+We are focused on developing a targeted solution for overall health, fitness, making daily activity easy and posture-related pain experienced by young professionals in Egypt. Many remote and office-based workers aged 25GÇô40 spend 6GÇô10 hours daily sitting, leading to chronic discomfort, stiffness, low energy levels, and declining productivity. Over time, this pain worsens, affecting both their work performance and overall quality of life.
+
+The product aims to address this urgent and growing problem by offering a structured, outcome-driven program. The solution will be designed specifically for busy professionals, integrating simple, practical routines that can be easily performed during the workday without requiring extensive time commitments or gym access.
+
+By focusing on a clearly defined audience and a measurable outcome, the product ensures strong market relevance, easier user acquisition, and faster validation. The long-term vision is to expand to broader age groups and additional pain-related use cases, but the initial rollout will prioritize a highly specific segment to maximize impact and effectiveness.
+
+EPIC 1: Client Interface
+
+Sub-Epic 1.1: Goal-Driven Onboarding
+
+Description: A dynamic, configurable onboarding flow that collects user-specific data based on their primary goal, ensuring a tailored start.
+
+Story 1.1.1: Goal Selection
+
+As a new user,
+
+I want to see a list of primary goals (e.g., Pain Relief, Improve Fitness) fetched from the admin configuration,
+
+So that I can select the one that best matches my needs, which will determine the subsequent questions I see.
+
+Acceptance Criteria:
+
+Goal list is fetched from a backend configuration table.
+
+The selected goal is stored in the user profile.
+
+The next steps in the flow are determined by this selection.
+
+Story 1.1.2: Dynamic Step Sequence
+
+As a new user,
+
+I want to see only the onboarding screens relevant to my selected goal,
+
+So that I don't have to answer irrelevant questions and the process feels personalized and efficient.
+
+Acceptance Criteria:
+
+The flow displays steps based on admin-defined rules for the chosen goal (e.g., Pain Map only for &quot;Pain Relief&quot;).
+
+I can navigate back to previous steps to review or change my answers.
+
+Input validation occurs before progressing to the next step.
+
+Story 1.1.3: Pain &amp; Body Map Input
+
+As a user who selected a pain-related goal,
+
+I want to tap on a body diagram to select my primary areas of pain, with support for multiple selections,
+
+So that I can accurately communicate where I'm experiencing discomfort.
+
+Acceptance Criteria:
+
+A touch-friendly body diagram with tap targets of at least 44x44px.
+
+Selected areas are visually highlighted.
+
+Selections persist when navigating between steps.
+
+Data is stored in a structured JSON format.
+
+Story 1.1.4: General Health &amp; Lifestyle Intake
+
+As a user with a non-pain goal (e.g., Fitness, Overall Health),
+
+I want to answer a modular questionnaire about my fitness level, habits, and health history,
+
+So that the system can understand my baseline health to create a safe and appropriate plan.
+
+Acceptance Criteria:
+
+Questions are displayed based on admin assignment to the selected goal.
+
+Input types include sliders, text, and multiple-choice.
+
+All data is saved in a JSON structure that matches the expected profile schema.
+
+Story 1.1.5: Mobility Self-Test Guides
+
+As a new user,
+
+I want to be guided through simple mobility tests with clear instructions (text + GIF/video) and options to answer &quot;Yes / No / With difficulty&quot;,
+
+So that my functional limitations can be assessed and factored into my AI-generated plan.
+
+Acceptance Criteria:
+
+Each test includes clear instructions and a visual guide.
+
+User selection is recorded.
+
+Data is saved as part of the user profile for the AI to analyze.
+
+Story 1.1.6: Nutritional Assessment
+
+As a user with a goal related to Weight Management or Overall Health,
+
+I want to complete screens about my dietary preferences, restrictions, and eating habits,
+
+So that the Nutrition Agent can generate a personalized meal plan for me.
+
+Acceptance Criteria:
+
+The assessment screen is only shown if the selected goal has a nutrition component.
+
+Data is stored in the user profile for the Nutrition Agent.
+
+Story 1.1.7: Red-Flag Screening
+
+As a user who selected a pain-related goal,
+
+I want to go through a mandatory checklist of red-flag symptoms,
+
+So that I can be made aware if my symptoms require medical consultation before starting an exercise program.
+
+Acceptance Criteria:
+
+If any red flag is checked, onboarding ends immediately.
+
+A clear message instructs the user to consult a doctor.
+
+Plan generation is disabled for the user.
+
+Story 1.1.8: Consent &amp; Disclaimer
+
+As a new user,
+
+I want to review and accept a disclaimer stating the app is not medical advice and consent to AI-generated plans,
+
+So that I can proceed with full understanding and compliance.
+
+Acceptance Criteria:
+
+A checkbox agreement is required to proceed.
+
+The acceptance is stored with a timestamp in the user's record.
+
+Sub-Epic 1.2: Wellness &amp; Training Plan Execution
+
+Description: The core user experience for viewing, performing, and customizing their daily wellness and training routines.
+
+Story 1.2.1: View Week Routine
+
+As a user with an active plan,
+
+I want to see a &quot;week's Routine&quot; card on my dashboard that shows my weeks's activities and estimated duration of each day,
+
+So that I can view my plan and understand what I need to do and get started with one tap.
+
+Acceptance Criteria:
+
+When I select a day, I view the day routine.
+
+Story 1.2.1: View Today's Routine
+
+As a user with an active plan,
+
+I want to see a &quot;Today's Routine&quot; card on my dashboard that shows my day's activities and estimated duration,
+
+So that I can quickly understand what I need to do and get started with one tap.
+
+Acceptance Criteria:
+
+The card loads content from the user's active plan.
+
+A &quot;Start Routine&quot; button is present.
+
+If no plan exists, a prompt to complete onboarding is shown.
+
+Story 1.2.2: Perform Activity with Set Tracking
+
+As a user performing a routine,
+
+I want to view each activity with its sets, reps, and a demonstration video, and then track my progress per set,
+
+So that I can follow along correctly and record my performance for future AI insights.
+
+Acceptance Criteria:
+
+Each set has a checkbox or manual rep input for tracking.
+
+Each activity views:
+
+EXERCISE
+
+SETS
+
+REPS
+
+REST
+
+WU.S
+
+TEMPO
+
+Image/gif/very short video
+
+Clickable DEMO Video
+
+MUSCLES\GOAL
+
+NOTES 
+
+After all sets are completed, the activity is marked as &quot;Done.&quot;
+
+I can skip activities that I didnGÇÖt perform, with an optional reason DDL and note
+
+Progress is saved per set and viewable in the history.
+
+Story 1.2.3: Log Exercise Feedback
+
+As a user after completing an exercise,
+
+I want to add optional notes (e.g., &quot;felt a twinge&quot;) and rate the perceived difficulty,
+
+So that the AI can use my feedback to suggest future modifications or adjustments to my plan.
+
+Acceptance Criteria:
+
+A note field and difficulty rating slider are presented.
+
+Notes are saved with the daily log for that specific exercise.
+
+Story 1.2.4: Swap an Exercise for Today
+
+As a user viewing my daily routine,
+
+I want to replace an exercise with an alternative one from the library for the current day only,
+
+So that I can work around temporary limitations, equipment unavailability, or personal preference without affecting my long-term plan.
+
+Acceptance Criteria:
+
+A &quot;Swap Exercise&quot; option is available.
+
+A modal displays alternative exercises filtered by movement type and body area.
+
+If the new exercise has a safety concern, a warning is shown and confirmation is required.
+
+Story 1.2.5: Swap an Exercise Program-Wide
+
+As a user who consistently dislikes or cannot perform a specific exercise,
+
+I want to replace that exercise for all future occurrences in my program,
+
+So that I can permanently customize my plan to better suit my needs.
+
+Acceptance Criteria:
+
+The swap modal includes an option to &quot;apply to all future days.&quot;
+
+The system updates the active plan's JSON accordingly.
+
+The change is logged for admin review.
+
+Story 1.2.6: Edit the Full Program
+
+As a user who wants more control over my plan,
+
+I want to access a dedicated &quot;Edit Program&quot; view where I can swap exercises, adjust sets/reps, and add rest days,
+
+So that I can make multiple, complex customizations to my entire 4+ week program.
+
+Acceptance Criteria:
+
+An &quot;Edit Program&quot; or &quot;Customize Plan&quot; option is accessible from the dashboard.
+
+Changes are saved as a new version of the plan.
+
+If a change triggers a safety flag, it is held for admin approval (per config).
+
+Story 1.2.7: View and Revert Plan History
+
+As a user who has made changes to my plan,
+
+I want to view a list of previous versions of my program and revert to an older one if needed,
+
+So that I can undo a set of changes or recover a preferred version of my plan.
+
+Acceptance Criteria:
+
+A &quot;Plan Version History&quot; view is accessible.
+
+Versions are listed with timestamps and change summaries.
+
+A &quot;Revert&quot; action is available and is logged.
+
+Story 1.2.8: Provide Post-Routine Feedback
+
+As a user after completing my day's activities,
+
+I want to use sliders and a text field to log my energy level, perceived difficulty, and pain level (if applicable),
+
+So that I can close out my day and provide essential data for the AI to track my progress.
+
+Acceptance Criteria:
+
+The feedback screen appears after marking the last activity as done.
+
+Feedback must be completed to officially mark the routine as &quot;Done.&quot;
+
+Data is saved to the daily log.
+
+Story 1.2.9: Receive Missed Day Notifications
+
+As a user with an active plan,
+
+I want to receive a push reminder if I haven't completed my routine by a certain time,
+
+So that I can stay on track with my fitness goals.
+
+Acceptance Criteria:
+
+The user can opt-in/out of these reminders.
+
+The reminder is sent at a configurable time if the day's routine is not marked complete.
+
+Sub-Epic 1.3: Nutrition Plan and Follow-up
+
+Description: Tools for viewing, logging, and providing feedback on a personalized nutrition plan.
+
+Story 1.3.1: View Nutrition Plan
+
+As a user with a goal that includes nutrition,
+
+I want to see my personalized meal plan in a clear, easy-to-follow format with a macronutrient breakdown,
+
+So that I can understand what and how much to eat to achieve my goals.
+
+Acceptance Criteria:
+
+The plan is displayed with daily meals.
+
+Macronutrient information (carbs, protein, fat) is visible.
+
+The plan is generated based on the onboarding assessment.
+
+Story 1.3.2: Log Meals
+
+As a user following a nutrition plan,
+
+I want to log the meals I've eaten, check off completed items, or note deviations,
+
+So that I can track my adherence and provide data for progress tracking and future AI adjustments.
+
+Acceptance Criteria:
+
+A simple interface for logging meals is available.
+
+Data is saved daily.
+
+I can add notes for the coach/admin.
+
+Story 1.3.3: Provide Nutritional Feedback
+
+As a user logging my meals,
+
+I want to provide feedback on my meal satisfaction and energy levels,
+
+So that the AI can learn my preferences and adjust future suggestions accordingly.
+
+Acceptance Criteria:
+
+A feedback interface is presented after meal logging.
+
+Feedback is stored and linked to the daily log.
+
+Story 1.3.4: Track Progress on Nutritional Goals
+
+As a user with a nutrition plan,
+
+I want to see visual indicators (graphs/summaries) of my progress toward goals like weight or energy levels,
+
+So that I can stay motivated and see the impact of my adherence over time.
+
+Acceptance Criteria:
+
+Graphs show trends based on logged data (e.g., weight, meals, feedback).
+
+Data is presented clearly on a progress dashboard.
+
+As a user, I can add a meal that is not in the schedule 
+
+Sub-Epic 1.4: Movement Reminders &amp; Tips
+
+Description: A system for delivering bite-sized wellness advice, reminders, and motivational content to the user.
+
+Story 1.4.1: Receive Movement Reminder Notifications
+
+As a user,
+
+I want to schedule and receive push notifications for posture breaks, stretches, or micro-exercises,
+
+So that I can incorporate healthy movement habits into my day.
+
+Acceptance Criteria:
+
+I can customize the frequency and timing of notifications.
+
+Tapping the notification links to a specific movement tip or stretch within the app.
+
+Story 1.4.2: Browse In-App Tips Feed
+
+As a user,
+
+I want to access a feed of short articles, GIFs, and tips about ergonomics and quick stretches,
+
+So that I can learn new ways to improve my wellbeing in small, manageable steps.
+
+Acceptance Criteria:
+
+The feed pulls content from a managed library.
+
+New content is visually highlighted.
+
+Story 1.4.3: Receive Motivational Messages
+
+As a user who has missed two consecutive training days,
+
+I want to receive a custom motivational push notification from the Follow-up Coach Agent,
+
+So that I feel encouraged to get back on track with my program.
+
+Acceptance Criteria:
+
+The message is generated by an AI agent.
+
+The message appears as a push notification and in the app's notification center.
+
+Sub-Epic 1.5: Profile Management
+
+Description: Tools for the user to manage their account, payment, and notification preferences.
+
+Story 1.5.1: Manage My Profile
+
+As a user,
+
+I want to view and edit my personal information and, if allowed, update my goal,
+
+So that my profile remains accurate and my plan stays aligned with my objectives.
+
+Acceptance Criteria:
+
+I can edit standard profile fields (name, email, etc.).
+
+Changing my goal may trigger a re-onboarding flow to collect missing data.
+
+Story 1.5.2: View Payment Status and Upload Receipt
+
+As a user with a pending subscription,
+
+I want to see my payment status (Active/Pending/Expired) and upload a receipt for manual verification,
+
+So that I can get my plan access activated.
+
+Acceptance Criteria:
+
+A clear indication of payment status is shown.
+
+A function to upload an image receipt is available.
+
+I see a confirmation after a successful upload.
+
+Story 1.5.3: Configure Notification Settings
+
+As a user,
+
+I want to have granular controls to opt-in or out of different types of push and email notifications,
+
+So that I only receive the communications that are important to me.
+
+Acceptance Criteria:
+
+Settings exist for reminders, weekly summaries, and motivational messages.
+
+Preferences are saved and respected by the notification system.
+
+Story 1.5.4: Switch Mode
+
+As a user,
+
+I want to switch between white and dark mode
+
+Story 1.5.5: Change Language
+
+As a user,
+
+I want to switch the application language.
+
+Sub-Epic 1.6: Blogs
+
+Description: A content management system to deliver articles and educational content to the user.
+
+Story 1.6.1: Search and Filter Blog Articles
+
+As a user,
+
+I want to view a list of blog articles that I can search and filter,
+
+So that I can easily find content relevant to my interests.
+
+Acceptance Criteria:
+
+Articles are displayed with title, summary, thumbnail, and date.
+
+Search and filtering (by category/tag) functionality is available.
+
+Story 1.6.2: Read a Full Blog Article
+
+As a user,
+
+I want to tap on an article and view its full content with rich text formatting, images, and embedded videos,
+
+So that I can have a clean, immersive reading experience on my mobile device.
+
+Acceptance Criteria:
+
+The view is optimized for mobile reading.
+
+All media loads correctly.
+
+Story 1.6.3: See Related Articles
+
+As a user reading a blog post,
+
+I want to see suggestions for similar articles at the end of the post,
+
+So that I can easily discover more content on topics I care about.
+
+Acceptance Criteria:
+
+Suggestions are based on tags or categories.
+
+Sub-Epic 1.7: Payment &amp; Access Control
+
+Description: The core logic for handling payment uploads and managing access to the app's primary features.
+
+Story 1.7.1: Upload Payment Receipt
+
+As a user,
+
+I want to upload a receipt for my InstaPay/Vodafone Cash transaction from within the app,
+
+So that an admin can verify my payment and grant me access to the full platform.
+
+Acceptance Criteria:
+
+The receipt image is stored securely.
+
+A confirmation message is shown to the user upon successful upload.
+
+Story 1.7.2: Access Plan Based on Payment Status
+
+As a user,
+
+I want to be shown my training and nutrition plans only if my payment status is &quot;active,&quot;
+
+So that I have full access to the content I've paid for.
+
+Acceptance Criteria:
+
+If payment_status is true, the user can view their plan.
+
+If payment_status is false, the user sees a &quot;Payment Pending&quot; screen with instructions.
+
+Access checks are performed on all protected routes.
+
+Story 1.7.3: Gain Plan Access After Verification
+
+As a user who has uploaded a receipt,
+
+I want my access to be granted automatically after an admin verifies my payment and toggles my status,
+
+So that I can start my program as soon as possible.
+
+Acceptance Criteria:
+
+The user's interface updates to show their plan immediately after the admin toggles the &quot;Paid&quot; status.
+
+ADMIN
+
+Story 1: Manage Exercise Library GÇô CRUD Operations
+
+As an administrator,
+
+I want to create, read, update, and delete exercises in the library,
+
+So that the AI Plan Creator and users have access to an upGÇætoGÇædate and accurate set of exercises.
+
+Acceptance Criteria:
+
+Each exercise entry includes: name, description, coaching cues, GÇ£feelGÇ¥ note, video URL (YouTube or selfGÇæhosted), default duration, and default sets/reps.
+
+Admin can browse the library with search and filter by body area, equipment, or difficulty.
+
+Deleting an exercise shows a warning if it is currently used in any active plan; admin must confirm.
+
+Story 2: Manage Exercise Substitution Rules
+
+As an administrator,
+
+I want to link exercises as interchangeable alternatives (e.g., GÇ£pushGÇæupsGÇ¥ can be swapped with GÇ£dumbbell pressGÇ¥ or GÇ£incline pushGÇæupsGÇ¥),
+
+So that when a user uses the GÇ£swap exerciseGÇ¥ feature, they see relevant, safe alternatives.
+
+Acceptance Criteria:
+
+Admin can add/remove alternative links for any exercise.
+
+The system uses these links to populate the swap modal for both daily and programGÇæwide swaps.
+
+Alternatives are automatically bidirectional or can be configured oneGÇæway.
+
+Story 3: Manage Plan Templates
+
+As an administrator,
+
+I want to create, edit, duplicate, and archive preGÇæbuilt plan templates (e.g., GÇ£Acute NeckGÇ¥, GÇ£Chronic Lower BackGÇ¥, GÇ£Beginner StrengthGÇ¥),
+
+So that coaches can quickly assign a proven starting point to a client or use it as a base for AI generation.
+
+Acceptance Criteria:
+
+Templates are stored separately from AIGÇægenerated plans.
+
+Admin can copy a template and modify it before assigning.
+
+Each template includes metadata: goal, difficulty level, estimated duration, and required equipment.
+
+Story 4: Manage Movement Tips &amp; Tricks Library
+
+As an administrator,
+
+I want to create and manage a library of tips, reminders, and quick exercises that can be displayed in the userGÇÖs inGÇæapp feed,
+
+So that I can deliver engaging wellness content to users on a schedule.
+
+Acceptance Criteria:
+
+Content can be text, GIF, or video (with thumbnail).
+
+Admin can schedule release dates and times for each piece.
+
+Content appears automatically in the userGÇÖs feed based on schedule and goal relevance (if tagged).
+
+Story 5: Bulk Import/Export Exercise Library
+
+As an administrator,
+
+I want to import exercises via CSV/Excel and export the current library to a file,
+
+So that I can efficiently seed the system with a large number of exercises or migrate data between environments.
+
+Acceptance Criteria:
+
+Import validates required fields and reports errors (e.g., duplicate names).
+
+Export produces a CSV with all exercise fields.
+
+Bulk operations are logged for audit.
+
+Story 6: Version History for Exercises
+
+As an administrator,
+
+I want to see a history of changes made to each exercise and revert to a previous version if needed,
+
+So that I can recover from accidental edits and track who made which change.
+
+Acceptance Criteria:
+
+Exercise detail page shows a GÇ£Version HistoryGÇ¥ tab with timestamps, user, and change summary.
+
+Admin can revert to any previous version with one click.
+
+Story 7: Preview Exercise in User Context
+
+As an administrator,
+
+I want to preview how an exercise will appear to a user (including video, cues, and default sets/reps),
+
+So that I can verify formatting and accuracy before making it available.
+
+Acceptance Criteria:
+
+A GÇ£PreviewGÇ¥ button in the exercise editor shows a mockup of the user view.
+
+The preview reflects the current draft of the exercise.
+
+Story 8: Categorize Exercises for Filtering
+
+As an administrator,
+
+I want to assign exercises to categories (body area, movement type, equipment, difficulty) and manage those categories,
+
+So that both admins and users can filter exercises effectively.
+
+Acceptance Criteria:
+
+Admin can create/edit categories for each type.
+
+Exercises can be tagged with multiple categories.
+
+Filters in the admin exercise list and user swap modal use these categories.
+
+Admin &amp; Backend Management GÇô EPIC 2: User Management &amp; Program Oversight
+
+This epic equips administrators with tools to manage users, verify payments, review AIGÇægenerated plans, oversee userGÇæinitiated changes, and configure permissions for safe program customization.
+
+Story 1: User Directory with Search and Filter
+
+As an administrator,
+
+I want to see a searchable, filterable list of all users,
+
+So that I can quickly locate a specific user or browse users by status.
+
+Acceptance Criteria:
+
+Directory displays: user name, email, goal, onboarding completion status, plan status (active/inactive), payment status, and last activity date.
+
+Search by name or email.
+
+Filters: goal, payment status (active/pending/expired), plan status, onboarding completed, and date range.
+
+Clicking a user navigates to their detailed view.
+
+Story 2: Manual Payment Verification
+
+As an administrator,
+
+I want to view uploaded receipts and toggle a userGÇÖs payment status,
+
+So that I can grant or revoke access based on payment verification.
+
+Acceptance Criteria:
+
+In user detail view, a GÇ£PaymentGÇ¥ section shows receipt image(s) with timestamp.
+
+Admin can toggle a GÇ£PaidGÇ¥ status (active/pending/expired).
+
+Toggle updates the userGÇÖs access rights immediately and logs the change.
+
+Payment status is reflected in the user directory.
+
+Story 3: Plan Approval Queue
+
+As an administrator,
+
+I want to see a queue of AIGÇægenerated plans awaiting approval, with user profile summaries and safety flags,
+
+So that I can review, edit, and publish safe and appropriate plans.
+
+Acceptance Criteria:
+
+Queue shows: user name, goal, profile summary (age, pain areas if applicable), safety flags (if any), creation date, and plan preview.
+
+Filter by status (pending, approved, rejected) and sort by date or priority.
+
+Clicking a plan opens the plan preview and edit view.
+
+Story 4: Plan Preview and Edit Before Publishing
+
+As an administrator,
+
+I want to click into a pending plan, view the full plan content, and make edits (swap exercises, modify sets/reps/cues, add/remove days),
+
+So that I can refine a plan before it goes live to the user.
+
+Acceptance Criteria:
+
+Edits are saved as a draft without affecting the userGÇÖs current plan.
+
+Admin can revert changes or discard draft.
+
+A GÇ£Approve &amp; PublishGÇ¥ button pushes the final plan to the userGÇÖs dashboard and updates the plan status to GÇ£active.GÇ¥
+
+Story 5: Safety Flag Override
+
+As an administrator,
+
+I want to see a warning banner when a plan has a safety flag and either approve it (with a note) or send it back to AI for regeneration,
+
+So that I can make an informed decision about potentially risky plans.
+
+Acceptance Criteria:
+
+Override reason and admin note are required and logged.
+
+If approved, the user receives a notification that their plan is ready.
+
+If rejected, the plan is returned to the AI for regeneration, and the user is notified of a delay.
+
+Story 6: UserGÇæInitiated Change Log
+
+As an administrator,
+
+I want to see a detailed log of all changes made by a user to their plan (swap exercise, add activity, adjust sets, etc.),
+
+So that I can monitor user behavior and identify patterns or potential issues.
+
+Acceptance Criteria:
+
+In the detailed client view, a GÇ£Change LogGÇ¥ tab shows: change type, original value, new value, date, and scope (daily vs. programGÇæwide).
+
+Admin can filter by change type (e.g., swap, add, delete, rep adjustment).
+
+Log entries are linked to the plan version at the time of change.
+
+Story 7: Plan Modification Approval Queue
+
+As an administrator,
+
+I want to review userGÇæinitiated changes that triggered a safety flag, with context (user profile, original plan, proposed change),
+
+So that I can approve, reject, or modify them while maintaining user safety.
+
+Acceptance Criteria:
+
+A dedicated queue shows changes requiring approval, with the userGÇÖs profile and a sideGÇæbyGÇæside comparison of original vs. proposed.
+
+Admin can approve, reject with a reason, or make modifications before approval.
+
+Approved changes are applied automatically; rejected changes are discarded with a notification to the user.
+
+Changes that do not trigger a safety flag are applied immediately without queue entry.
+
+Story 8: Configure User Edit Permissions per Goal
+
+As an administrator,
+
+I want to set permissions per goal (and optionally per user) defining what edits are allowed,
+
+So that I can control the level of customization offered based on risk or user needs.
+
+Acceptance Criteria:
+
+In goal configuration, admin can select: allow daily swaps only, allow programGÇæwide edits, allow full program editing, or disallow edits.
+
+A userGÇæspecific override is available in the client detail view.
+
+Default setting is applied to all new users of that goal.
+
+Story 9: Exercise Substitution Rule Management
+
+As an administrator,
+
+I want to define which exercises are considered interchangeable for swap suggestions (e.g., GÇ£pushGÇæupsGÇ¥ Gåö GÇ£dumbbell pressGÇ¥),
+
+So that the swap modal offers relevant, safe alternatives.
+
+Acceptance Criteria:
+
+In the exercise library, admin can link exercises as GÇ£alternativesGÇ¥ (bidirectional or oneGÇæway).
+
+The system uses these links to populate the swap modal for both daily and programGÇæwide swaps.
+
+Admin can review and edit substitution rules at any time.
+
+Story 10: Audit Trail of Admin Actions
+
+As an administrator,
+
+I want all admin actions (payment verification, plan approval, permission overrides, etc.) to be logged with timestamp and admin identity,
+
+So that there is a complete audit trail for compliance and accountability.
+
+Acceptance Criteria:
+
+An admin_logs table records action type, target user, details, and admin user ID.
+
+Logs are viewable in the admin interface with search and filter capabilities.
+
+Logs cannot be deleted.
+
+Story 11: Bulk Plan Approval
+
+As an administrator,
+
+I want to select multiple pending plans and approve them in bulk,
+
+So that I can process a large volume of plans efficiently.
+
+Acceptance Criteria:
+
+In the Plan Approval Queue, checkboxes allow selecting multiple plans.
+
+A GÇ£Bulk ApproveGÇ¥ button is available (with confirmation).
+
+Plans that have safety flags are excluded from bulk approval unless explicitly included with warning.
+
+Story 12: Notify User on Plan Approval or Rejection
+
+As an administrator,
+
+I want the system to automatically notify users when their plan is approved, rejected, or requires action,
+
+So that users are kept informed without manual outreach.
+
+Acceptance Criteria:
+
+Push notification and/or email (based on user preferences) are sent when:
+
+Plan is approved and published.
+
+Plan is rejected (with reason).
+
+A userGÇæinitiated change requires approval (pending).
+
+Notifications include a direct link to the relevant section in the app.
+
+Admin &amp; Backend Management GÇô EPIC 3: AI Agent Management
+
+Description: This epic provides administrators with tools to monitor, configure, and control the AI agents that power plan generation, safety auditing, and followGÇæup coaching. It includes observability, prompt versioning, LLM service abstraction, and cost governance.
+
+Story 1: AI Agent Monitoring Dashboard
+
+As an administrator,
+
+I want to see a dashboard showing the status, last run time, success/failure rates, and recent errors for all AI agents,
+
+So that I can quickly identify and address operational issues with the AI services.
+
+Acceptance Criteria:
+
+Dashboard lists all agents (Onboarding Profiler, Plan Creator, Safety Auditor, FollowGÇæup Coach, Nutrition Agent).
+
+Each agent shows: current status (idle/running/error), last execution time, success rate over the past 24 hours, and total calls today.
+
+Failed runs are listed with error messages and links to detailed logs.
+
+Alerts are triggered when an agentGÇÖs failure rate exceeds a configurable threshold.
+
+Story 2: Prompt Versioning &amp; Configuration Interface
+
+As an administrator,
+
+I want to view, edit, and version prompts for all AI agents through a simple text interface,
+
+So that I can iteratively improve agent behavior without requiring code changes or deployments.
+
+Acceptance Criteria:
+
+A GÇ£Prompt ManagementGÇ¥ section in the admin panel lists each agent and goal combination (e.g., Plan Creator GÇô Pain Relief).
+
+Prompts are stored in a database table with version history.
+
+Admin can edit the prompt, add a change note, and publish a new version.
+
+The system uses the latest published version for all new agent runs; older versions are retained for rollback.
+
+Story 3: LLM Service Abstraction &amp; Provider Configuration
+
+As a developer/admin,
+
+I want to configure which LLM provider (OpenAI, Anthropic, etc.) and which model (e.g., GPTGÇæ4, ClaudeGÇæ3) each agent uses, with the ability to set API keys via environment variables,
+
+So that the system is flexible to provider changes, rate limits, and cost optimization.
+
+Acceptance Criteria:
+
+Environment variables define default provider and API keys.
+
+Admin can override provider/model per agent in the configuration interface.
+
+The abstraction layer handles retries, fallbacks, and response parsing consistently across providers.
+
+Story 4: AI Call Logging &amp; Audit Trail
+
+As an administrator,
+
+I want to view detailed logs of every AI agent invocation, including input prompt, output response, token usage, execution time, and any errors,
+
+So that I can debug issues, audit decisions, and measure performance.
+
+Acceptance Criteria:
+
+All AI calls are stored in an ai_logs table with: timestamp, agent name, user_id (if applicable), goal, prompt version, input data, output JSON, tokens used, cost, and duration.
+
+Admin can search logs by user, agent, date range, and status (success/error).
+
+Logs are retained for a configurable period.
+
+Story 5: Cost Control &amp; Token Budgeting
+
+As an administrator,
+
+I want to set monthly token budgets per user and overall, and receive alerts when thresholds are approached,
+
+So that I can prevent unexpected cost overruns.
+
+Acceptance Criteria:
+
+Admin can configure a global monthly budget and a perGÇæuser soft limit.
+
+The system tracks cumulative token usage per user and stops generating new plans for users who exceed the limit (with a notification).
+
+Alerts are sent to admin when usage reaches 80%, 90%, and 100% of the global budget.
+
+Story 6: Caching for Common AI Responses
+
+As a developer,
+
+I want to cache responses for identical or highly similar requests (e.g., generating a plan for the same user profile within a short window) to reduce token consumption,
+
+So that costs are minimized and response times improved.
+
+Acceptance Criteria:
+
+Caching is implemented for Plan Creator and Nutrition Agent with a configurable TTL.
+
+Admin can view cache hit/miss metrics on the AI monitoring dashboard.
+
+Cache can be manually cleared per user or globally.
+
+Story 7: Simulated AI Testing Mode
+
+As an administrator,
+
+I want to run AI agents in a GÇ£test modeGÇ¥ that uses mock responses or a sandboxed environment,
+
+So that I can test new prompts or configurations without affecting real users or incurring costs.
+
+Acceptance Criteria:
+
+A toggle in the admin interface enables test mode for specific agents.
+
+In test mode, the system either returns a predefined mock JSON or calls a test endpoint with dummy data.
+
+Test runs are logged separately and do not count toward usage budgets.
+
+Story 8: Agent Fallback &amp; Error Handling Configuration
+
+As an administrator,
+
+I want to configure fallback behaviors for each agent when the LLM service fails (e.g., use a simpler template, notify admin, pause generation),
+
+So that the system remains resilient and user experience is not disrupted.
+
+Acceptance Criteria:
+
+Admin can specify fallback action per agent: GÇ£use default templateGÇ¥, GÇ£retry up to 3 timesGÇ¥, GÇ£pause and alert adminGÇ¥.
+
+Fallback actions are logged and visible in the monitoring dashboard.
+
+Manual retry or override is available from the admin interface.
+
+Story 9: AI Performance Analytics
+
+As an administrator,
+
+I want to see analytics on AI agent performance over time: average response time, token consumption, cost per agent, and cost per user,
+
+So that I can identify optimization opportunities and track cost trends.
+
+Acceptance Criteria:
+
+Graphs show cost and latency trends by agent over days/weeks/months.
+
+Breakdown by goal to see which user segments incur higher costs.
+
+Data can be exported for deeper analysis.
+
+Story 10: Automated Retries with Exponential Backoff
+
+As a developer,
+
+I want the LLM service abstraction to automatically retry failed requests (e.g., due to rate limits or transient network issues) with exponential backoff,
+
+So that temporary failures do not cause plan generation to fail.
+
+Acceptance Criteria:
+
+Retry logic is applied with configurable max retries (default 3) and backoff multipliers.
+
+After all retries fail, the fallback behavior defined in Story 8 is triggered.
+
+Retry attempts are logged for visibility.
+
+Admin &amp; Backend Management GÇô EPIC 4: Client Management
+
+Description: This epic provides administrators and coaches with a centralized, comprehensive view of individual clients, enabling efficient management of client data, notes, manual interventions, and goal adjustments.
+
+Story 1: Detailed Client View GÇô Unified Dashboard
+
+As an administrator or coach,
+
+I want to click into any user from the user directory and see a unified dashboard displaying their full profile, training logs, nutrition logs, communication history, and coach notes,
+
+So that I have all the information needed to support that client without navigating multiple screens.
+
+Acceptance Criteria:
+
+The detailed view includes tabs or sections for:
+
+Profile: Personal info, goal, onboarding data, payment status, plan status.
+
+Training Logs: List of daily logs with completion, pain scores, difficulty, energy, and notes. Filterable by date.
+
+Nutrition Logs: Meal logs, deviations, and feedback.
+
+Communication History: Notifications sent, messages (if any), and userGÇægenerated notes.
+
+Coach Notes: Internal notes (see Story 2).
+
+All data is displayed in a readable, scannable format.
+
+Quick actions are available (e.g., GÇ£Regenerate PlanGÇ¥, GÇ£Verify PaymentGÇ¥, GÇ£Change GoalGÇ¥).
+
+Story 2: Coach Notes GÇô Internal NoteGÇæTaking
+
+As an administrator or coach,
+
+I want to add, edit, and delete internal notes for a client, with each note being timestamped and attributed to the author,
+
+So that I can track observations, interventions, and followGÇæup actions privately.
+
+Acceptance Criteria:
+
+Notes are stored in a separate table linked to the user, visible only to admins/coaches.
+
+Each note has a timestamp, author name, and content (rich text optional).
+
+Notes can be pinned or flagged for followGÇæup.
+
+Search functionality across all notes for a client.
+
+Story 3: Manual Plan Assignment
+
+As an administrator or coach,
+
+I want to assign a preGÇædefined plan template (or a custom plan) to a user, overwriting any existing plan,
+
+So that I can quickly provide a program without waiting for AI generation, or replace a plan that isnGÇÖt working.
+
+Acceptance Criteria:
+
+In the client detail view, a GÇ£Assign PlanGÇ¥ button opens a modal to select from:
+
+Plan templates (by goal)
+
+Previously generated plans for this user
+
+Custom JSON upload
+
+The assignment overwrites the userGÇÖs active plan and creates a new version.
+
+A confirmation dialog warns that the previous plan will be archived.
+
+The change is logged in the plan changes log.
+
+Story 4: Goal Override with Regeneration Prompt
+
+As an administrator or coach,
+
+I want to change a userGÇÖs goal from the client detail screen, with the option to trigger a regeneration of the plan,
+
+So that I can correct a userGÇÖs selection or pivot their program when clinical judgment indicates a different focus.
+
+Acceptance Criteria:
+
+Changing the goal updates the userGÇÖs profile and logs the change.
+
+After saving, a prompt asks: GÇ£Regenerate plan based on new goal?GÇ¥ with options:
+
+Yes, regenerate GÇô triggers the AI agents to create a new plan.
+
+No, keep current plan GÇô leaves the existing plan but updates the goal.
+
+If regeneration is chosen, the old plan is archived and the new plan goes through the approval queue.
+
+Story 5: View and Export Client Logs
+
+As an administrator or coach,
+
+I want to export a clientGÇÖs training logs, nutrition logs, and feedback to CSV/Excel,
+
+So that I can perform offline analysis or share with other professionals.
+
+Acceptance Criteria:
+
+In each logs section (Training, Nutrition), there is an GÇ£ExportGÇ¥ button.
+
+Exports include all relevant fields for the date range selected.
+
+Large exports are processed in the background and delivered via email.
+
+Story 6: Client Communication History
+
+As an administrator or coach,
+
+I want to see a timeline of all communications sent to the client (push notifications, emails, inGÇæapp messages) and any responses or feedback,
+
+So that I can understand the clientGÇÖs engagement and context of interactions.
+
+Acceptance Criteria:
+
+A GÇ£CommunicationGÇ¥ tab lists each message with timestamp, type (push, email), content preview, and delivery status.
+
+UserGÇæinitiated actions (e.g., providing feedback, swapping exercises) are also shown as system events in the same timeline.
+
+Admin can filter by communication type.
+
+Story 7: Client Activity Summary Widget
+
+As an administrator or coach,
+
+I want to see a summary widget at the top of the client detail view showing key metrics: days since last login, routine completion rate over the last 30 days, and current streak,
+
+So that I can quickly assess engagement without scrolling through logs.
+
+Acceptance Criteria:
+
+Completion rate is calculated as (completed routines / assigned routines) for the last 30 days.
+
+Streak shows the number of consecutive days with completed routines.
+
+Data is updated in near realGÇætime.
+
+Story 8: Manual Payment Status Override (Reinforced)
+
+As an administrator,
+
+I want to manually override a clientGÇÖs payment status (e.g., grant complimentary access, mark as expired) from the client detail view,
+
+So that I can manage exceptions and special cases.
+
+Acceptance Criteria:
+
+A GÇ£PaymentGÇ¥ card shows current status and a dropdown to change it.
+
+An optional reason field is required for the override.
+
+The change is logged in the audit log.
+
+Access rights are updated immediately.
+
+Story 9: Client Safety Alert Banner
+
+As an administrator or coach,
+
+I want a prominent banner at the top of the client detail view if the client has any outstanding safety flags (e.g., redGÇæflag responses, plan safety flag, or recent risky swaps),
+
+So that I can prioritize highGÇærisk clients and take immediate action.
+
+Acceptance Criteria:
+
+The banner displays the type of alert and a link to the relevant section (e.g., GÇ£Review pending planGÇ¥, GÇ£Client reported redGÇæflag symptomsGÇ¥).
+
+Alerts can be dismissed only after review, with a reason.
+
+Story 10: Quick Actions Menu
+
+As an administrator or coach,
+
+I want a GÇ£Quick ActionsGÇ¥ menu in the client detail view with shortcuts to common tasks,
+
+So that I can perform frequent operations efficiently.
+
+Acceptance Criteria:
+
+Actions include: GÇ£Regenerate PlanGÇ¥, GÇ£Manually Add LogGÇ¥, GÇ£Send MessageGÇ¥, GÇ£Adjust ProgramGÇ¥, GÇ£Archive ClientGÇ¥, GÇ£Request Data ExportGÇ¥.
+
+Each action opens the appropriate modal or workflow.
+
+Actions that require confirmation have a warning.
+
+Admin &amp; Backend Management GÇô EPIC 5: Programs, Nutrition, Blogs &amp; Onboarding Configuration
+
+Description: This epic covers the remaining backend management features: overseeing client programs (lifecycle, progress, manual adjustments), managing blog content, administering nutrition libraries and plans, and configuring the dynamic onboarding flow. These capabilities enable admins to control the full client journey from signup to program delivery.
+
+SubGÇæEpic 5.1: Client Programs Management (Creation and FollowGÇæup)
+
+Story 5.1.1: Program Lifecycle Overview
+
+As an administrator or coach,
+
+I want to see an overview of all active, pending, and completed programs for clients, with the ability to filter by program type (training, nutrition) and status,
+
+So that I can track program status and manage caseload effectively.
+
+Acceptance Criteria:
+
+Dashboard shows counts of active, pending approval, and completed programs.
+
+List view includes client name, program type, start date, end date, current status, and completion percentage.
+
+Clicking a program opens the detailed client view scoped to that program.
+
+Story 5.1.2: Aggregated Progress Tracking (Admin View)
+
+As an administrator or coach,
+
+I want to view aggregated progress data for clients on a specific program, including adherence rates, pain score trends (if applicable), and feedback summaries,
+
+So that I can evaluate program effectiveness at scale and identify clients who may need intervention.
+
+Acceptance Criteria:
+
+From the program list, admin can select a program (e.g., GÇ£Acute Lower Back v2GÇ¥) and see:
+
+Average adherence rate across all clients.
+
+Graph of average pain score over time.
+
+Distribution of difficulty feedback (easy, just right, hard).
+
+Data can be filtered by date range and client segments.
+
+Story 5.1.3: Manual Program Adjustments MidGÇæCycle
+
+As an administrator or coach,
+
+I want to manually adjust a clientGÇÖs active program midGÇæcycle (e.g., swap an exercise, change a meal, adjust progression) without regenerating the entire plan,
+
+So that I can respond quickly to client feedback or clinical changes.
+
+Acceptance Criteria:
+
+From the client detail view, a GÇ£Adjust ProgramGÇ¥ button allows editing the current plan.
+
+Changes are saved as a new version and logged.
+
+Client receives a notification that their program has been updated.
+
+If a change introduces a safety concern, the admin is warned before saving.
+
+Story 5.1.4: Program Completion and Archiving
+
+As an administrator,
+
+I want to manually mark a clientGÇÖs program as completed or archive it,
+
+So that I can close out finished programs and keep the active list clean.
+
+Acceptance Criteria:
+
+Admin can change program status from GÇ£activeGÇ¥ to GÇ£completedGÇ¥ or GÇ£archivedGÇ¥.
+
+Archiving removes the program from the clientGÇÖs active view but retains data for history.
+
+A reason field is optional but encouraged.
+
+SubGÇæEpic 5.2: Blogs Management
+
+Story 5.2.1: Blog Post CRUD with Rich Text Editor
+
+As an administrator,
+
+I want to create, edit, and delete blog posts using a rich text editor that supports formatting, images, and embedded videos,
+
+So that I can produce highGÇæquality educational content for users.
+
+Acceptance Criteria:
+
+Rich text editor includes bold, italics, lists, headings, image upload, and video embed.
+
+Fields for title, summary, featured image, author, tags, categories, and publish status.
+
+Drafts are saved automatically.
+
+Story 5.2.2: Category and Tag Management
+
+As an administrator,
+
+I want to create, edit, and delete blog categories and tags,
+
+So that content can be organized and users can filter articles effectively.
+
+Acceptance Criteria:
+
+Dedicated interface to manage hierarchical categories and flat tags.
+
+Categories and tags can be assigned to posts during creation/editing.
+
+Deleting a category/tag prompts to reassign existing posts.
+
+Story 5.2.3: Scheduled Publishing
+
+As an administrator,
+
+I want to set a future publish date for blog posts or save them as drafts,
+
+So that content can be released on a planned cadence.
+
+Acceptance Criteria:
+
+Admin can set GÇ£Publish atGÇ¥ date and time.
+
+Posts with a future date appear as GÇ£scheduledGÇ¥ and become visible automatically at the designated time.
+
+Immediate publish option is also available.
+
+Story 5.2.4: Blog Preview and User View Simulation
+
+As an administrator,
+
+I want to preview a blog post as it will appear to users before publishing,
+
+So that I can verify formatting and layout.
+
+Acceptance Criteria:
+
+A GÇ£PreviewGÇ¥ button shows the post in the userGÇæfacing layout.
+
+Preview respects mobile viewport.
+
+Story 5.2.5: Blog Analytics
+
+As an administrator,
+
+I want to see views, average read time, and engagement metrics (likes, shares) for each blog post,
+
+So that I can understand what content resonates with users.
+
+Acceptance Criteria:
+
+Each postGÇÖs detail page shows view count, unique readers, and average time on page.
+
+Aggregated views by category/tag are available.
+
+SubGÇæEpic 5.3: Nutrition Management
+
+Story 5.3.1: Meal Library CRUD
+
+As an administrator or nutritionist,
+
+I want to create, edit, and delete meals and recipes, including name, description, ingredients, macronutrients (carbs, protein, fat), calories, and meal type,
+
+So that the Nutrition Agent and coaches have an upGÇætoGÇædate library to generate and assign plans.
+
+Acceptance Criteria:
+
+Each meal entry includes fields for name, description, ingredients list, macros, calories, and meal type (breakfast, lunch, dinner, snack).
+
+Admin can upload an image for the meal.
+
+Library can be searched and filtered by meal type, dietary restrictions (e.g., vegetarian, glutenGÇæfree), and macros.
+
+Story 5.3.2: Nutrition Plan Templates
+
+As an administrator,
+
+I want to create, duplicate, and modify preGÇæbuilt nutrition plan templates for common goals (e.g., GÇ£Weight LossGÇ¥, GÇ£Muscle GainGÇ¥, GÇ£General WellnessGÇ¥),
+
+So that they can be used as starting points for AI generation or manually assigned.
+
+Acceptance Criteria:
+
+Templates are structured as a weekly plan with daily meal slots.
+
+Admin can copy a template and edit it.
+
+Templates are stored separately from AIGÇægenerated plans.
+
+Story 5.3.3: Nutritionist Tools GÇô Meal Log Review and Feedback
+
+As an administrator or nutritionist,
+
+I want to view a clientGÇÖs logged meals and feedback, and add comments or suggestions visible to the client,
+
+So that I can provide manual nutrition oversight and guidance.
+
+Acceptance Criteria:
+
+From the client detail view, a GÇ£NutritionGÇ¥ tab shows daily meal logs and any user notes.
+
+A comment box allows adding a message (e.g., GÇ£Try swapping this snack for a proteinGÇærich optionGÇ¥).
+
+Client sees the comment in their app under the nutrition section.
+
+Story 5.3.4: Nutritional Goal Tracking (Admin View)
+
+As an administrator or nutritionist,
+
+I want to see a clientGÇÖs progress toward nutritional goals (e.g., weight change, calorie adherence) over time,
+
+So that I can assess whether the nutrition plan is effective.
+
+Acceptance Criteria:
+
+Graphs show trends for logged weight, average daily calories, and macro adherence.
+
+Data can be filtered by date range.
+
+Story 5.3.5: Bulk Import/Export Meal Library
+
+As an administrator,
+
+I want to import meals via CSV/Excel and export the current library,
+
+So that I can efficiently seed the system with a large number of meals.
+
+Acceptance Criteria:
+
+Import validates required fields and reports errors.
+
+Export produces a CSV with all meal fields.
+
+Bulk operations are logged.
+
+SubGÇæEpic 5.4: Onboarding Flow Management
+
+Story 5.4.1: Goal Management
+
+As an administrator,
+
+I want to create, edit, and archive goals (e.g., GÇ£Pain ReliefGÇ¥, GÇ£Improve FitnessGÇ¥, GÇ£Overall HealthGÇ¥),
+
+So that the onboarding goal list stays aligned with the product offerings.
+
+Acceptance Criteria:
+
+Each goal has a name, description, internal key, and an active/inactive toggle.
+
+Goals can be ordered for display in the user interface.
+
+Archiving a goal hides it from new users but preserves data for existing users.
+
+Story 5.4.2: Step Library Management
+
+As an administrator,
+
+I want to define reusable onboarding steps (e.g., GÇ£Pain MapGÇ¥, GÇ£Nutritional AssessmentGÇ¥) with configurable input fields and validation rules,
+
+So that I can build consistent building blocks for flows.
+
+Acceptance Criteria:
+
+Each step has a title, description, and one or more input fields (text, slider, checkbox, radio, multiGÇæselect).
+
+Validation rules (required, min/max, regex) can be attached.
+
+Steps can be tagged with categories (e.g., pain, nutrition, lifestyle).
+
+Story 5.4.3: Flow Builder (DragGÇæandGÇæDrop)
+
+As an administrator,
+
+I want to select which steps are included in a goalGÇÖs onboarding flow and arrange them in order using a dragGÇæandGÇædrop interface,
+
+So that I can easily configure the user experience for each goal.
+
+Acceptance Criteria:
+
+Admin chooses a goal and sees a list of available steps.
+
+Steps can be added, removed, and reordered.
+
+Steps can be marked as mandatory or optional.
+
+Changes are saved and versioned.
+
+Story 5.4.4: Conditional Logic (Field Visibility)
+
+As an administrator,
+
+I want to define conditional rules that show or hide fields within a step based on previous answers,
+
+So that the onboarding flow adapts dynamically to user inputs.
+
+Acceptance Criteria:
+
+Rule editor supports simple ifGÇæthen conditions (e.g., GÇ£If goal = Weight Management, show detailed diet questionsGÇ¥).
+
+Conditions can be based on any previous question.
+
+Admin can test the flow in a preview mode.
+
+Story 5.4.5: Profile Schema Versioning
+
+As an administrator,
+
+I want to see a version history of onboarding flow changes and preview schema differences before publishing,
+
+So that I can manage backward compatibility and avoid breaking existing user profiles.
+
+Acceptance Criteria:
+
+Each time an onboarding flow is saved, a new version is created.
+
+Admin can view differences between versions (JSON diff).
+
+Existing users continue with their original flow version; new users get the latest.
+
+Story 5.4.6: Preview and Test Onboarding Flow
+
+As an administrator,
+
+I want to simulate the onboarding flow as a new user would experience it, including conditional branching,
+
+So that I can validate the flow before it goes live.
+
+Acceptance Criteria:
+
+A GÇ£Preview FlowGÇ¥ button opens a simulation that steps through the configured screens.
+
+Admin can input test data and see how subsequent steps behave.
+
+The preview does not save to the actual user database.
+
+Story 5.4.7: Goal Assignment Override (Reinforced)
+
+As an administrator,
+
+I want to change a userGÇÖs goal from the client detail screen, with the option to trigger reGÇæonboarding or plan regeneration,
+
+So that I can correct user selections or pivot their program.
+
+Acceptance Criteria:
+
+Changing goal updates the userGÇÖs profile and logs the change.
+
+Admin is prompted: GÇ£Regenerate plan? ReGÇæcollect onboarding data? Keep current plan?GÇ¥
+
+Regeneration uses the new goalGÇÖs flow to collect any missing data.
+
+Admin &amp; Backend Management GÇô EPIC 6: Reporting, Analytics &amp; Business Intelligence
+
+Description: This epic provides administrators and stakeholders with comprehensive insights into platform performance, user engagement, plan effectiveness, AI operations, and business metrics. It enables dataGÇædriven decision making and proactive management.
+
+SubGÇæEpic 6.1: Operational Dashboards
+
+Story 6.1.1: Platform Overview Dashboard
+
+As an administrator,
+
+I want to see a highGÇælevel dashboard showing key metrics: total users, new users (today, week, month), active plans, payment conversion rate, and system health,
+
+So that I can quickly assess the overall health and growth of the platform.
+
+Acceptance Criteria:
+
+Metrics are updated in near realGÇætime.
+
+Graphs show trends over configurable time ranges (day, week, month, custom).
+
+Data can be exported as CSV or PDF.
+
+Story 6.1.2: User Engagement Dashboard
+
+As an administrator,
+
+I want to view engagement metrics: Daily Active Users (DAU), Monthly Active Users (MAU), routine completion rate, average session duration, and retention cohorts,
+
+So that I can understand how effectively users adopt and stick with the platform.
+
+Acceptance Criteria:
+
+Metrics are segmented by goal, plan type, and user segment.
+
+Retention table shows percentage of users active at week 1, 2, 4, 8, etc.
+
+Completion rate is calculated as (routines completed / routines assigned) over a period.
+
+Story 6.1.3: Payment &amp; Revenue Dashboard
+
+As an administrator,
+
+I want to see revenue metrics: Monthly Recurring Revenue (MRR), number of paid users, pending verifications, churn rate, and average revenue per user (ARPU),
+
+So that I can track the financial performance of the platform.
+
+Acceptance Criteria:
+
+MRR is calculated from users with active payment status.
+
+Churn rate shows percentage of paid users who become inactive.
+
+A list of pending payment verifications with direct links to user profiles.
+
+Graphs of revenue over time.
+
+SubGÇæEpic 6.2: Plan &amp; Program Effectiveness
+
+Story 6.2.1: Plan Quality Dashboard
+
+As an administrator,
+
+I want to see aggregated metrics on AIGÇægenerated plans: approval rate, rejection rate, safety flags by type, and average time from generation to approval,
+
+So that I can assess the quality of AI outputs and identify areas for prompt improvement.
+
+Acceptance Criteria:
+
+Metrics are filterable by goal, date range, and plan version.
+
+DrillGÇædown to view individual plans with reviewer notes.
+
+Trend graph shows approval rate over time.
+
+Story 6.2.2: User Outcome Trends
+
+As an administrator,
+
+I want to see aggregated user feedback over time: average pain score (for pain goals), energy level, perceived difficulty, and satisfaction ratings,
+
+So that I can evaluate whether plans are leading to positive outcomes.
+
+Acceptance Criteria:
+
+Graphs show average metrics over time for cohorts.
+
+Data can be filtered by goal, plan version, and user segment.
+
+Compare outcomes across different plan templates.
+
+Story 6.2.3: Exercise Usage &amp; Effectiveness Analytics
+
+As an administrator,
+
+I want to see which exercises are most frequently included in plans, most swapped out, and most often flagged as GÇ£too easyGÇ¥ or GÇ£too hardGÇ¥,
+
+So that I can curate the exercise library and improve substitution rules.
+
+Acceptance Criteria:
+
+Dashboard shows top exercises by inclusion count, swapGÇæout rate, and difficulty feedback distribution.
+
+DrillGÇædown to see exercise performance by goal.
+
+Export data for deeper analysis.
+
+SubGÇæEpic 6.3: AI Agent Performance &amp; Cost Analytics
+
+Story 6.3.1: AI Usage &amp; Cost Dashboard
+
+As an administrator,
+
+I want to see detailed metrics on AI agent usage: number of calls, token consumption, cost per agent, cost per user, and total monthly cost,
+
+So that I can manage operational costs and optimize prompts.
+
+Acceptance Criteria:
+
+Dashboard shows total cost today, this week, this month.
+
+Breakdown by agent (Onboarding Profiler, Plan Creator, Safety Auditor, FollowGÇæup Coach, Nutrition Agent).
+
+Cost per user with ability to sort and filter.
+
+Alerts when budget thresholds are approached.
+
+Story 6.3.2: AI Latency &amp; Error Monitoring
+
+As an administrator,
+
+I want to monitor average response time and error rate for each AI agent,
+
+So that I can identify performance issues with the LLM service or prompt complexity.
+
+Acceptance Criteria:
+
+Graphs show response time percentiles (p50, p95, p99) over time.
+
+Error rate trends are displayed.
+
+DrillGÇædown to individual failed requests with error details.
+
+SubGÇæEpic 6.4: Content &amp; Engagement Analytics
+
+Story 6.4.1: Movement Tips &amp; Tricks Performance
+
+As an administrator,
+
+I want to see engagement metrics for movement tips, including views, likes, and tapGÇæthrough rate,
+
+So that I can create content that resonates with users.
+
+Acceptance Criteria:
+
+Each tip shows view count and engagement rate.
+
+Trends show which categories perform best.
+
+Data can be exported.
+
+Story 6.4.2: Blog Analytics
+
+As an administrator,
+
+I want to see views, average read time, and engagement (likes, shares) for each blog post,
+
+So that I can understand what content resonates and plan future topics.
+
+Acceptance Criteria:
+
+Each postGÇÖs detail page shows view count, unique readers, and average time on page.
+
+Aggregated views by category/tag are available.
+
+SubGÇæEpic 6.5: Data Export &amp; Scheduled Reporting
+
+Story 6.5.1: Export Reports to CSV/Excel
+
+As an administrator,
+
+I want to export any dashboard or report data to CSV or Excel format,
+
+So that I can perform deeper analysis in external tools.
+
+Acceptance Criteria:
+
+Export option is available on all reporting screens.
+
+Exports include the current filtered view with all relevant columns.
+
+Large exports are processed in the background and delivered via email.
+
+Story 6.5.2: Scheduled Report Delivery
+
+As an administrator,
+
+I want to schedule daily, weekly, or monthly reports (e.g., user growth, payment summary, AI costs) to be sent to my email,
+
+So that I stay informed without needing to log in.
+
+Acceptance Criteria:
+
+Admin can select report type, frequency, recipients, and format (CSV, PDF).
+
+Reports are generated automatically and emailed.
+
+Story 6.5.3: Custom Report Builder (Advanced)
+
+As an administrator,
+
+I want to build custom reports by selecting metrics, filters, and date ranges,
+
+So that I can answer specific business questions not covered by standard dashboards.
+
+Acceptance Criteria:
+
+A queryGÇælike interface allows selection of tables and fields.
+
+Saved custom reports can be run on demand or scheduled.
+
+Results are previewed and exportable.
+
+SubGÇæEpic 6.6: User Segmentation &amp; Cohort Analysis
+
+Story 6.6.1: User Segmentation by Attributes
+
+As an administrator,
+
+I want to create and save segments of users based on goal, plan type, activity level, payment status, and engagement,
+
+So that I can analyze behavior patterns and target communications.
+
+Acceptance Criteria:
+
+Segment builder with multiple filters (goal, days active, routine completion, etc.).
+
+Segments can be saved for reuse.
+
+Show user counts and summary metrics for each segment.
+
+Story 6.6.2: Cohort Retention Analysis
+
+As an administrator,
+
+I want to view retention rates for cohorts defined by signup date, goal, or onboarding flow version,
+
+So that I can understand which onboarding paths lead to higher longGÇæterm engagement.
+
+Acceptance Criteria:
+
+Retention table shows percentage of users active at week 1, 2, 4, 8, etc.
+
+Compare multiple cohorts sideGÇæbyGÇæside.
+
+Export retention data for further analysis.
+
+SubGÇæEpic 6.7: Webhook &amp; Data Integration
+
+Story 6.7.1: Webhook Integration for BI Tools
+
+As a developer,
+
+I want to configure webhooks that send user events (onboarding complete, plan generated, routine completed, payment verified) to a data warehouse or analytics platform,
+
+So that external BI tools can consume realGÇætime data.
+
+Acceptance Criteria:
+
+Webhook endpoint is configurable per event type.
+
+Payload includes relevant user and event data.
+
+Retries and error logging are implemented.
+
+Story 6.7.2: Data Warehouse Sync
+
+As a developer,
+
+I want to implement a daily export of anonymized user, plan, and log data to a cloud storage bucket for use in external analytics,
+
+So that data analysts can run complex queries without impacting production.
+
+Acceptance Criteria:
+
+Scheduled job exports data in JSON or Parquet format.
+
+Data is anonymized (PII removed) for privacy.
+
+Export logs are available for monitoring.
+
+Admin &amp; Backend Management GÇô EPIC 7: System Configuration, Security &amp; Administration
+
+Description: This epic covers the foundational system administration features that enable secure, configurable, and maintainable operation of the platform. It includes roleGÇæbased access control, system settings, notification management, audit logs, and maintenance tools.
+
+SubGÇæEpic 7.1: RoleGÇæBased Access Control (RBAC)
+
+Story 7.1.1: Define Admin Roles and Permissions
+
+As an super administrator,
+
+I want to create and manage roles (e.g., Super Admin, Content Manager, Coach, Nutritionist, Viewer) with granular permissions,
+
+So that team members can access only the features they need, improving security and accountability.
+
+Acceptance Criteria:
+
+Predefined roles are seeded with default permissions.
+
+Admin can create custom roles and assign specific permissions (e.g., GÇ£can approve plansGÇ¥, GÇ£can edit exercise libraryGÇ¥, GÇ£can view reportsGÇ¥).
+
+Permissions are enforced on all admin routes and API endpoints.
+
+Story 7.1.2: Assign Roles to Admin Users
+
+As an super administrator,
+
+I want to assign one or more roles to each admin user,
+
+So that I can tailor access levels to individual responsibilities.
+
+Acceptance Criteria:
+
+Admin user management interface shows current roles.
+
+Roles can be added or removed.
+
+Changes take effect immediately on next login.
+
+Story 7.1.3: Admin Audit Trail for Actions
+
+As an super administrator,
+
+I want to see a log of all admin actions (who did what, when, and on which resource),
+
+So that I can monitor activity and investigate any unauthorized or erroneous changes.
+
+Acceptance Criteria:
+
+Every admin action (plan approval, payment toggle, exercise edit, etc.) is logged with admin ID, action type, target, timestamp, and IP address.
+
+Logs are viewable and searchable by admin user, date, and action type.
+
+Logs cannot be deleted or altered.
+
+SubGÇæEpic 7.2: System Configuration &amp; Settings
+
+Story 7.2.1: Global System Settings Interface
+
+As an administrator,
+
+I want to configure global system settings (e.g., app name, contact email, notification sender name, default notification timing) through a central interface,
+
+So that I can manage the platform without code changes.
+
+Acceptance Criteria:
+
+Settings are stored in a database table keyGÇævalue.
+
+Admin can edit values via a form.
+
+Settings are cached to avoid repeated database queries.
+
+Story 7.2.2: Configure Plan Generation Defaults
+
+As an administrator,
+
+I want to set default values for plan generation (e.g., default duration in weeks, default exercise duration, fallback templates),
+
+So that the AI Plan Creator has sensible defaults.
+
+Acceptance Criteria:
+
+Admin can edit defaults via a configuration screen.
+
+Newly generated plans use these defaults unless overridden by user profile.
+
+Story 7.2.3: Configure Notification Timing and Templates
+
+As an administrator,
+
+I want to set default timings for reminder notifications (e.g., missed day reminder at 7 PM) and edit push/email notification templates,
+
+So that communication can be customized without engineering involvement.
+
+Acceptance Criteria:
+
+Admin can edit notification templates with placeholders (e.g., {{user_name}}, {{goal}}).
+
+Default times for reminders are configurable per notification type.
+
+Changes apply to future notifications.
+
+SubGÇæEpic 7.4: Notification Management
+
+Story 7.4.1: View and Resend Failed Notifications
+
+As an administrator,
+
+I want to see a list of failed push or email notifications and manually retry them,
+
+So that I can ensure important communications are delivered.
+
+Acceptance Criteria:
+
+A GÇ£Notification FailuresGÇ¥ queue shows timestamp, user, notification type, and error reason.
+
+Admin can retry individual or bulk notifications.
+
+Retry success/failure is recorded.
+
+Story 7.4.2: Broadcast Notification to User Segments
+
+As an administrator,
+
+I want to compose and send a broadcast notification (push and/or email) to a saved user segment (e.g., all active painGÇærelief users),
+
+So that I can communicate promotions, tips, or announcements.
+
+Acceptance Criteria:
+
+Admin can select a segment (from EPIC 6.6.1) or upload a list of user IDs.
+
+Message can include text, image, and link.
+
+Broadcast is scheduled or sent immediately.
+
+Delivery stats are shown.
+
+SubGÇæEpic 7.6: API Key &amp; Webhook Management
+
+Story 7.6.1: Generate and Revoke API Keys for External Integrations
+
+As an administrator,
+
+I want to create and manage API keys for thirdGÇæparty integrations (e.g., mobile app, external BI tools),
+
+So that I can control access to the platformGÇÖs APIs.
+
+Acceptance Criteria:
+
+Admin can generate a new API key with expiration date and permissions scope.
+
+Keys can be revoked at any time.
+
+Usage logs show which key was used and when.
+
+Story 7.6.2: Webhook Configuration
+
+As an administrator,
+
+I want to configure webhook endpoints for external services (e.g., Zapier, custom analytics) and select which events trigger them,
+
+So that the platform can integrate with external tools.
+
+Acceptance Criteria:
+
+Admin can add webhook URLs, select event types (user.created, plan.approved, etc.), and set up authentication.
+
+Delivery logs show attempts, successes, and failures.
+
+Failed webhooks can be retried.
+
+Admin &amp; Backend Management GÇô EPIC 8: Advanced Integrations, Support Tools &amp; Platform Extensibility
+
+Description: This epic covers advanced capabilities that extend the platformGÇÖs functionality beyond core operations. It includes integration with support and helpdesk tools, multiGÇælanguage management, whiteGÇælabeling for partners, an API developer portal, compliance reporting, and feature flag management for gradual rollouts.
+
+SubGÇæEpic 8.2: MultiGÇælanguage &amp; Localization Management
+
+Story 8.2.1: Language Management
+
+As an administrator,
+
+I want to enable one or more languages for the platform and set the default,
+
+So that users can use the app in their preferred language.
+
+Acceptance Criteria:
+
+Admin can add/remove languages from a supported list.
+
+A language selector is available to users.
+
+All UI text is externalized and can be translated.
+
+Story 8.2.2: Translation Management Interface
+
+As an administrator,
+
+I want to manage translations for all UI text strings through a central interface,
+
+So that translations can be updated without code changes.
+
+Acceptance Criteria:
+
+Admin can view all text keys with translations for each language.
+
+Missing translations are highlighted.
+
+Export/import translations via CSV/JSON.
+
+Story 8.2.3: Localized Content (Exercises, Tips, Blogs)
+
+As an administrator,
+
+I want to provide localized versions of exercises, movement tips, and blog posts,
+
+So that content is culturally appropriate and accessible in multiple languages.
+
+Acceptance Criteria:
+
+Each content item can have perGÇælanguage versions (title, description, cues).
+
+The system shows the appropriate version based on user language.
+
+Fallback to default language if translation is missing.
+
+SubGÇæEpic 8.3: WhiteGÇælabeling &amp; Branding Configuration
+
+Story 8.3.1: Custom Branding (Logo, Colors, Domain)
+
+As an administrator,
+
+I want to upload a custom logo, define primary/secondary brand colors, and optionally use a custom subdomain,
+
+So that the platform can be whiteGÇælabeled for corporate clients or partners.
+
+Acceptance Criteria:
+
+Admin can upload logo (light/dark variants) and set color palette.
+
+Branding is applied to all userGÇæfacing pages and emails.
+
+Option to use a custom domain (e.g., app.partner.com) with SSL.
+
+SubGÇæEpic 8.5: Compliance &amp; Audit Reporting
+
+Story 8.5.1: Comprehensive Audit Log Viewer
+
+As an administrator,
+
+I want to view a detailed audit log of all systemGÇælevel events (user data access, admin actions, AI agent runs, payment changes),
+
+So that I can demonstrate compliance with regulations like HIPAA, GDPR, or SOC2.
+
+Acceptance Criteria:
+
+Audit log includes timestamp, actor (user/admin/system), action, resource, details, and IP.
+
+Logs are searchable, filterable, and exportable.
+
+Logs are immutable and stored for a configurable retention period.
+
+Story 7.5.1: Backup &amp; Restore Management
+
+As an administrator,
+
+I want to trigger onGÇædemand backups of the database and view backup history,
+
+So that I can ensure data can be recovered in case of disaster.
+
+Acceptance Criteria:
+
+Admin can initiate a manual backup via UI.
+
+Scheduled backups (daily/weekly) are configured via system settings.
+
+Backup list shows date, size, and status; restore function is available (with confirmation).
+
+Story 7.5.4: Scheduled Job Management
+
+As an administrator,
+
+I want to view and manually trigger scheduled jobs (e.g., AI agent runs, notification dispatches, report generation),
+
+So that I can monitor background processes and retry failed ones.
+
+Acceptance Criteria:
+
+List of all recurring jobs with last run time, next run, and status.
+
+Admin can trigger a job immediately.
+
+Failed jobs show error details and allow retry.
+
+
+
+EPIC 0: Authentication & User Management
+
+Description: A robust authentication system providing multiple entry points via Email, Mobile (OTP), and Social providers (Google, Facebook).
+
+Story 0.1: Multi-Provider Sign Up
+As a new user,
+I want to create an account using my Email, Mobile number, or Social accounts (Google, Facebook),
+So that I can quickly join the platform using my preferred method.
+
+Story 0.2: Secure Log In
+As a returning user,
+I want to log in using my credentials or social accounts,
+So that I can access my personalized fitness plan and progress.
+
+Story 0.3: Password Recovery
+As a user who forgot my password,
+I want to receive a reset link via Email,
+So that I can regain access to my account securely.
+
+Story 0.4: Session Management
+As a user,
+I want to stay logged in across sessions and be able to log out from all devices,
+So that my account remains private and easy to access.
+
+## New Requirement Addendum (Added during Phase 2/3 Orchestration)
+### Granular Workout Tracking & Sequence Enforcement
+**User Story:** As an active user executing a routine, I need to input exactly how many reps I completed and the weight/time I used for each individual set, rather than just clicking a generic "Mark Complete" checkbox. Additionally, I must be forced to complete my sets in chronological order to maintain workout integrity.
+
+**Acceptance Criteria:**
+* **Dynamic Input Fields:** Replace the single "Mark Complete" checkbox per set with numerical input fields for Reps and Weight (lbs/kg) (or Time for static holds).
+* **Skip Functionality:** Provide an explicit "Skip Set" button alongside the tracking inputs.
+* **Chronological Locking logic:** Set N+1 tracking inputs must be strictly disabled until Set N is either completed or skipped.
+
+# Implementation Status - Admin Dashboard Modernization
+
+| Epic / Story | Feature | Status | Notes |
+| :--- | :--- | :--- | :--- |
+| **EPIC 2** | **User Management & Program Oversight** | | |
+| Story 2.1 | User Directory Search & Filter | ? Implemented | Modernized UI with searchable, filterable user list. |
+| Story 2.2 | Manual Payment Verification | ?? Partial | UI exists in "Dossier" view; backend wiring pending. |
+| Story 2.3 | Plan Approval Queue | ? Implemented | Real-time queue with profile summaries and safety flags. |
+| Story 2.4 | Plan Review and Edit Modal | ?? Partial | Interactive review modal implemented; full CRUD edits in progress. |
+| Story 2.5 | Safety Flag Override | ?? Partial | Visual flags implemented; override logic pending backend trigger. |
+| Story 2.11| Bulk Plan Approval | ? Pending | UI support exists, backend batch action needed. |
+| **EPIC 4** | **Client Management (Dossier View)** | | |
+| Story 4.1 | Unified Client Dashboard | ? Implemented | High-fidelity "Dossier" view with biological markers. |
+| Story 4.2 | Coach Notes | ? Pending | Next scheduled enhancement for Dossier view. |
+| Story 4.3 | Manual Plan Assignment | ?? Partial | "Program Override" UI implemented; template selection pending. |
+| **EPIC 5** | **Exercise Library** | | |
+| Story 5.1 | Manage Exercise Library (CRUD) | ? Implemented | Modernized "Movement Protocol Database" UI. |
+| Story 5.2 | Bulk Import/Export | ? Pending | UI planned for protocol management tab. |
+| **EPIC 6** | **Reporting & Analytics** | | |
+| Story 6.1 | Operational Dashboards | ? Implemented | High-contrast metrics and growth trajectory analytics. |
+| **SYSTEM** | **Core Admin Capabilities** | | |
+| SYSTEM | URL-Based Routing | ? Implemented | Tab navigation persists via search parameters. |
+| SYSTEM | Secure Logout Flow | ? Implemented | Complete session termination and redirection. |
+| SYSTEM | Dark Mode Design Tokens | ? Implemented | Unified premium visual identity across all components. |
+
