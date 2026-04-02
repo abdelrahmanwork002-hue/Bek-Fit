@@ -4,7 +4,8 @@ import {
   Search, Plus, Edit2, Trash2, Play, Filter, 
   Loader2, Dumbbell, XCircle, Archive, 
   RefreshCcw, Eye, Save, Trash, FileSpreadsheet, 
-  Sparkles, Keyboard, ChevronDown, Upload, Wand2, Download
+  Sparkles, Keyboard, ChevronDown, Upload, Wand2, Download,
+  Clock
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
@@ -194,7 +195,7 @@ export function ExerciseLibrary() {
               <table className="w-full text-left">
                  <thead>
                     <tr className="bg-secondary/30 border-b border-border">
-                       {['Identity', 'Category', 'Anatomy', 'Module Specs', 'Volume', 'Operations'].map((h) => (
+                       {['Identity', 'Category', 'Anatomy', 'Module Specs', 'Protocol Default', 'Operations'].map((h) => (
                           <th key={h} className="px-8 py-5 text-[10px] font-black text-muted-foreground uppercase tracking-widest">{h}</th>
                        ))}
                     </tr>
@@ -225,7 +226,10 @@ export function ExerciseLibrary() {
                           </td>
                           <td className="px-8 py-6">
                              <p className="text-sm font-black text-foreground">{ex.sets} × {ex.reps}</p>
-                             <p className="text-[10px] font-bold text-muted-foreground opacity-60 uppercase">{ex.duration}</p>
+                             <div className="flex items-center gap-1 mt-1">
+                                <Clock className="w-3 h-3 text-muted-foreground opacity-50" />
+                                <p className="text-[10px] font-bold text-muted-foreground opacity-60 uppercase">{ex.duration} DEFAULT</p>
+                             </div>
                           </td>
                           <td className="px-8 py-6">
                              <div className="flex items-center gap-2">
@@ -538,15 +542,15 @@ function ExerciseFormModal({
 
                <div className="grid grid-cols-3 gap-6">
                   <div className="space-y-2">
-                     <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-center block">Sets</label>
+                     <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-center block">Default Sets</label>
                      <input type="number" value={formData.default_sets} onChange={(e) => setFormData({ ...formData, default_sets: e.target.value })} className="w-full px-4 py-3 bg-secondary/50 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 outline-none text-center font-black" />
                   </div>
                   <div className="space-y-2">
-                     <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-center block">Reps</label>
+                     <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-center block">Default Reps</label>
                      <input type="number" value={formData.default_reps} onChange={(e) => setFormData({ ...formData, default_reps: e.target.value })} className="w-full px-4 py-3 bg-secondary/50 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 outline-none text-center font-black" />
                   </div>
                   <div className="space-y-2">
-                     <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-center block">Secs</label>
+                     <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-center block">Default Rest (s)</label>
                      <input type="number" value={formData.duration_seconds} onChange={(e) => setFormData({ ...formData, duration_seconds: e.target.value })} className="w-full px-4 py-3 bg-secondary/50 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 outline-none text-center font-black" />
                   </div>
                </div>
