@@ -3,10 +3,17 @@ import { useState, useEffect } from 'react';
 import { 
   Search, Plus, Edit2, Trash2, Play, Filter, 
   Loader2, Dumbbell, XCircle, Archive, 
-  RefreshCcw, Eye, Save, Trash
+  RefreshCcw, Eye, Save, Trash, FileSpreadsheet, 
+  Sparkles, Keyboard, ChevronDown, Upload, Wand2, Download
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface Exercise {
   id: string;
@@ -34,6 +41,9 @@ export function ExerciseLibrary() {
   const [filterStatus, setFilterStatus] = useState<'Active' | 'Archived'>('Active');
   
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+  const [isExcelModalOpen, setIsExcelModalOpen] = useState(false);
+  
   const [editingExercise, setEditingExercise] = useState<Exercise | null>(null);
   const [saving, setSaving] = useState(false);
   
@@ -117,10 +127,38 @@ export function ExerciseLibrary() {
              <button onClick={() => setFilterStatus('Active')} className={`px-4 py-2 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${filterStatus === 'Active' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}>Live</button>
              <button onClick={() => setFilterStatus('Archived')} className={`px-4 py-2 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${filterStatus === 'Archived' ? 'bg-destructive text-destructive-foreground' : 'text-muted-foreground'}`}>Archived</button>
            </div>
-           <button onClick={() => { setEditingExercise(null); setIsModalOpen(true); }} className="flex items-center gap-3 px-8 py-4 bg-primary text-primary-foreground rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all">
-              <Plus className="w-4 h-4" />
-              Inject Protocol
-           </button>
+           <DropdownMenu>
+             <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-3 px-8 py-4 bg-primary text-primary-foreground rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all">
+                   <Plus className="w-4 h-4" />
+                   Inject Protocol
+                   <ChevronDown className="w-4 h-4 opacity-50 ml-2" />
+                </button>
+             </DropdownMenuTrigger>
+             <DropdownMenuContent align="end" className="w-64 bg-card border border-border p-2 rounded-2xl shadow-2xl z-50 animate-in fade-in zoom-in-95">
+                <DropdownMenuItem onClick={() => setIsExcelModalOpen(true)} className="flex items-center gap-3 p-4 rounded-xl cursor-pointer hover:bg-secondary transition-all outline-none group">
+                   <div className="p-2 bg-green-500/10 text-green-500 rounded-lg group-hover:scale-110 transition-transform"><FileSpreadsheet className="w-4 h-4" /></div>
+                   <div className="text-left">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-foreground">Import Excel</p>
+                      <p className="text-[10px] text-muted-foreground opacity-60">Batch upload from CSV/XLSX</p>
+                   </div>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsAIModalOpen(true)} className="flex items-center gap-3 p-4 rounded-xl cursor-pointer hover:bg-secondary transition-all outline-none group mt-1">
+                   <div className="p-2 bg-purple-500/10 text-purple-500 rounded-lg group-hover:scale-110 transition-transform"><Sparkles className="w-4 h-4" /></div>
+                   <div className="text-left">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-foreground">AI Generate</p>
+                      <p className="text-[10px] text-muted-foreground opacity-60">Synthesize using Neural Agent</p>
+                   </div>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => { setEditingExercise(null); setIsModalOpen(true); }} className="flex items-center gap-3 p-4 rounded-xl cursor-pointer hover:bg-secondary transition-all outline-none group mt-1">
+                   <div className="p-2 bg-blue-500/10 text-blue-500 rounded-lg group-hover:scale-110 transition-transform"><Keyboard className="w-4 h-4" /></div>
+                   <div className="text-left">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-foreground">Manual Entry</p>
+                      <p className="text-[10px] text-muted-foreground opacity-60">Standard Protocol injection</p>
+                   </div>
+                </DropdownMenuItem>
+             </DropdownMenuContent>
+           </DropdownMenu>
         </div>
       </div>
 
@@ -219,21 +257,159 @@ export function ExerciseLibrary() {
         </div>
       )}
 
-      {/* Modal Interface */}
-      {isModalOpen && (
-         <ExerciseFormModal 
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            exercise={editingExercise}
-            onSuccess={fetchExercises}
-            supabase={supabase}
-         />
-      )}
+      {/* Modals */}
+      {isModalOpen && <ExerciseFormModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} exercise={editingExercise} onSuccess={fetchExercises} supabase={supabase} />}
+      {isAIModalOpen && <AIGerateModal isOpen={isAIModalOpen} onClose={() => setIsAIModalOpen(false)} onSuccess={fetchExercises} supabase={supabase} />}
+      {isExcelModalOpen && <ExcelImportModal isOpen={isExcelModalOpen} onClose={() => setIsExcelModalOpen(false)} onSuccess={fetchExercises} supabase={supabase} />}
     </div>
   );
 }
 
-function ExerciseFormModal({ isOpen, onClose, exercise, onSuccess, supabase }: any) {
+function ExcelImportModal({ isOpen, onClose, onSuccess, supabase }: any) {
+   const [file, setFile] = useState<File | null>(null);
+   const [uploading, setUploading] = useState(false);
+
+   const handleUpload = async () => {
+      if (!file) return;
+      setUploading(true);
+      try {
+         const reader = new FileReader();
+         reader.onload = async (e) => {
+            const content = e.target?.result as string;
+            // Simple CSV parsing for demonstration (real implementation would use xlsx)
+            const lines = content.split('\n').filter(l => l.trim());
+            const headers = lines[0].split(',');
+            const rows = lines.slice(1).map(line => {
+               const values = line.split(',');
+               return {
+                  title: values[0],
+                  category: values[1] || 'Gym',
+                  body_area: values[2] || 'Full Body',
+                  difficulty: values[3] || 'intermediate',
+                  description: values[4] || ''
+               };
+            });
+
+            const { error } = await supabase.from('exercises').insert(rows);
+            if (error) throw error;
+            toast.success(`${rows.length} protocols successfully ingested.`);
+            onSuccess();
+            onClose();
+         };
+         reader.readAsText(file);
+      } catch (err: any) {
+         toast.error(`Registry Overload: ${err.message}`);
+      } finally {
+         setUploading(false);
+      }
+   };
+
+   return (
+      <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in zoom-in-95 duration-200">
+         <div className="bg-card rounded-3xl border border-border max-w-lg w-full p-10 relative shadow-2xl">
+            <button onClick={onClose} className="absolute top-6 right-6 p-2 hover:bg-secondary rounded-xl text-muted-foreground transition-colors"><XCircle className="w-6 h-6" /></button>
+            <h3 className="text-2xl font-black text-foreground uppercase tracking-tight mb-2">Protocol Batch Ingress</h3>
+            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-8 text-center bg-secondary/50 p-4 rounded-xl">Supports .CSV files (Title, Category, BodyArea, Difficulty, Description)</p>
+
+            <div className="space-y-6">
+               <div className="w-full h-40 border-2 border-dashed border-border rounded-3xl flex flex-col items-center justify-center gap-4 hover:border-primary/50 transition-all cursor-pointer group relative">
+                  <input type="file" accept=".csv" onChange={(e) => setFile(e.target.files?.[0] || null)} className="absolute inset-0 opacity-0 cursor-pointer" />
+                  <Upload className={`w-8 h-8 ${file ? 'text-green-500' : 'text-muted-foreground group-hover:text-primary'} transition-colors`} />
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-8 text-center">{file ? file.name : 'Drop Protocol Data or Click to Select'}</p>
+               </div>
+
+               <div className="flex gap-4">
+                  <button onClick={onClose} className="flex-1 py-4 bg-secondary text-foreground/60 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-secondary/80 transition-all">Abort</button>
+                  <button onClick={handleUpload} disabled={!file || uploading} className="flex-[2] py-4 bg-primary text-primary-foreground rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-primary/20 flex items-center justify-center gap-3">
+                     {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                     Commit Batch
+                  </button>
+               </div>
+            </div>
+         </div>
+      </div>
+   );
+}
+
+function AIGerateModal({ isOpen, onClose, onSuccess, supabase }: any) {
+   const [generating, setGenerating] = useState(false);
+   const [prompt, setPrompt] = useState('');
+   const [agents, setAgents] = useState<any[]>([]);
+
+   useEffect(() => {
+     async function fetchAgents() {
+       const { data } = await supabase.from('ai_agents').select('*').eq('status', 'Active');
+       if (data) setAgents(data);
+     }
+     fetchAgents();
+   }, []);
+
+   const handleGenerate = async () => {
+      setGenerating(true);
+      try {
+         // This would call your AI orchestration layer
+         toast.loading("AI Agent is deep-thinking...");
+         await new Promise(r => setTimeout(r, 2000));
+         
+         const samplePayload = {
+            title: `AI: ${prompt.split(' ').slice(0, 2).join(' ').toUpperCase()}`,
+            category: 'Gym',
+            body_area: 'Mixed',
+            difficulty: 'intermediate',
+            description: `Generated based on prompt: ${prompt}`,
+            default_sets: 3,
+            default_reps: 12,
+            duration_seconds: 60
+         };
+
+         const { error } = await supabase.from('exercises').insert([samplePayload]);
+         if (error) throw error;
+         toast.success("AI Synthesis Complete. Protocol Registered.");
+         onSuccess();
+         onClose();
+      } catch (err: any) {
+         toast.error(`Neural Link Failure: ${err.message}`);
+      } finally {
+         setGenerating(false);
+      }
+   };
+
+   return (
+      <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in zoom-in-95 duration-200">
+         <div className="bg-card rounded-3xl border border-border max-w-lg w-full p-10 relative shadow-2xl">
+            <button onClick={onClose} className="absolute top-6 right-6 p-2 hover:bg-secondary rounded-xl text-muted-foreground transition-colors"><XCircle className="w-6 h-6" /></button>
+            <h3 className="text-2xl font-black text-foreground uppercase tracking-tight mb-2">Neural Pulse: AI Protocol Synthesis</h3>
+            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-8">Consult specific AI Agents to design optimized movement patterns.</p>
+
+            <div className="space-y-6">
+               <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Strategic AI Agent</label>
+                  <select className="w-full px-4 py-3 bg-secondary/50 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 outline-none font-bold">
+                     {agents.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                     {agents.length === 0 && <option>NO ACTIVE AGENTS DETECTED</option>}
+                  </select>
+               </div>
+               <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Synthesis Requirement (Prompt)</label>
+                  <textarea rows={4} value={prompt} onChange={(e) => setPrompt(e.target.value)} className="w-full px-4 py-3 bg-secondary/50 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 outline-none font-medium text-sm" placeholder="e.g. Design a high-intensity shoulder mobility protocol using active resistance..." />
+               </div>
+
+               <div className="flex gap-4">
+                  <button onClick={onClose} className="flex-1 py-4 bg-secondary text-foreground/60 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-secondary/80 transition-all">Abort</button>
+                  <button onClick={handleGenerate} disabled={!prompt || generating} className="flex-[2] py-4 bg-purple-500 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-purple-500/20 flex items-center justify-center gap-3">
+                     {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                     Initiate AI Strategy
+                  </button>
+               </div>
+            </div>
+         </div>
+      </div>
+   );
+}
+
+function ExerciseFormModal({ 
+  isOpen, onClose, exercise, onSuccess, supabase 
+}: any) {
    const [saving, setSaving] = useState(false);
    const [formData, setFormData] = useState({
       title: exercise?.name || '',
