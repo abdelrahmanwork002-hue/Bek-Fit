@@ -37,16 +37,27 @@ export function PlanApprovalQueue() {
           email,
           created_at,
           profile_data,
-          goals ( title ),
-          plans ( is_active )
+          goal_id,
+          goals:goal_id ( title ),
+          plans ( id, is_active )
         `);
       
       if (!error && data) {
-         const queue: PendingPlan[] = data.map((u: any) => {
-            const profile = u.profile_data || {};
+         const queue: PendingPlan[] = data.map((u: { 
+            id: string; 
+            full_name: string | null; 
+            email: string | null; 
+            created_at: string; 
+            profile_data: any;
+            goals: Array<{ title: string }> | null;
+            plans: Array<{ id: string, is_active: boolean }> | null;
+         }) => {
+            const profile = (u.profile_data as Record<string, any>) || {};
+            const plan = u.plans?.[0]; 
+            const goal = u.goals?.[0];            
             let status: 'pending' | 'approved' | 'rejected' = 'pending';
-            if (u.plans && u.plans.length > 0) {
-              status = u.plans[0].is_active ? 'approved' : 'pending';
+            if (plan) {
+              status = plan.is_active ? 'approved' : 'pending';
             }
             
             const flags: string[] = [];
@@ -54,16 +65,16 @@ export function PlanApprovalQueue() {
             if (profile.pain_areas && profile.pain_areas.length > 0) flags.push("Pain management flags");
             
             return {
-              id: u.id,
+              id: plan?.id || u.id, // Prefer plan ID for operations
               userName: u.full_name || 'Unnamed User',
               userEmail: u.email || 'No Email',
-              goal: u.goals?.title || 'General Fitness',
+              goal: goal?.title || 'General Fitness',
               age: profile.age || 0,
               painAreas: profile.pain_areas || [],
               safetyFlags: flags,
               createdDate: new Date(u.created_at).toISOString().split('T')[0],
               status: status,
-              planSummary: 'AI-generated progressive overload module pending review.',
+              planSummary: 'Individual movement protocol synthesized via AI core. Final baseline audit suggested.',
               weekCount: 8,
               workoutsPerWeek: 3
             }
@@ -76,12 +87,12 @@ export function PlanApprovalQueue() {
   }, [supabase]);
 
   const handleApprovePlan = async (planId: string) => {
-    // Note: planId in this component is actually the userId (from the fetch mapping)
-    // We update the associated plan
+    // If planId is still userId (no plan yet), we can't approve. 
+    // But usually there is a plan if it's in the queue.
     const { error } = await supabase
       .from('plans')
-      .update({ is_active: true, status: 'active' })
-      .eq('user_id', planId);
+      .update({ is_active: true })
+      .eq('id', planId);
 
     if (error) {
       toast.error('Failed to validate movement protocol.');
@@ -96,13 +107,13 @@ export function PlanApprovalQueue() {
   const handleRejectPlan = async (planId: string) => {
     const { error } = await supabase
       .from('plans')
-      .delete() // Or update status to 'rejected'
-      .eq('user_id', planId);
+      .delete()
+      .eq('id', planId);
 
     if (error) {
       toast.error('Failed to deny module.');
     } else {
-      toast.error('Protocol denied. Module purged from queue.');
+      toast.success('Protocol denied. Module purged from queue.');
       setPlans(prev => prev.map(p => p.id === planId ? { ...p, status: 'rejected' } : p));
       if (selectedPlan?.id === planId) setSelectedPlan(null);
     }

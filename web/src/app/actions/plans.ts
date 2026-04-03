@@ -20,7 +20,7 @@ export async function generateInitialPlan() {
   // 2. Create the base Plan
   const { data: plan, error: planError } = await supabase
     .from('plans')
-    .insert({ user_id: user.id, is_active: true })
+    .insert({ user_id: user.id, is_active: false })
     .select()
     .single()
 

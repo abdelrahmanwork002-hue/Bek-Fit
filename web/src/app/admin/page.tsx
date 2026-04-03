@@ -6,7 +6,6 @@ import { createClient } from '@/lib/supabase/client';
 import { ExerciseLibrary } from '@/components/admin/ExerciseLibrary';
 import { UserManagement } from '@/components/admin/UserManagement';
 import { PlanApprovalQueue } from '@/components/admin/PlanApprovalQueue';
-import { PlanTemplates } from '@/components/admin/PlanTemplates';
 import { Analytics } from '@/components/admin/Analytics';
 import { AIAgentManagement } from '@/components/admin/AIAgentManagement';
 import {
@@ -14,7 +13,6 @@ import {
   Dumbbell,
   Users,
   FileCheck,
-  FileText,
   BarChart3,
   Bot,
   Menu,
@@ -23,7 +21,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 
-type View = 'dashboard' | 'exercises' | 'users' | 'approvals' | 'templates' | 'analytics' | 'ai_agents';
+type View = 'dashboard' | 'exercises' | 'users' | 'approvals' | 'analytics' | 'ai_agents';
 
 function AdminContent() {
   const router = useRouter();
@@ -31,7 +29,16 @@ function AdminContent() {
   const pathname = usePathname();
   const supabase = createClient();
   
-  const currentTab = (searchParams.get('tab') as View) || 'dashboard';
+  const currentTabRaw = searchParams.get('tab');
+  const currentTab = (currentTabRaw as View) || 'dashboard';
+
+  // Guard against invalid tabs to prevent ghost pages
+  useEffect(() => {
+    const validTabs: View[] = ['dashboard', 'exercises', 'users', 'approvals', 'analytics', 'ai_agents'];
+    if (currentTabRaw && !validTabs.includes(currentTabRaw as View)) {
+      setTab('dashboard');
+    }
+  }, [currentTabRaw, searchParams]);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mounted, setMounted] = useState(false);
 
@@ -55,7 +62,6 @@ function AdminContent() {
     { id: 'exercises' as View, label: 'Exercise Library', icon: Dumbbell },
     { id: 'users' as View, label: 'User Management', icon: Users },
     { id: 'approvals' as View, label: 'Plan Approvals', icon: FileCheck },
-    { id: 'templates' as View, label: 'Plan Templates', icon: FileText },
     { id: 'analytics' as View, label: 'Analytics', icon: BarChart3 },
     { id: 'ai_agents' as View, label: 'AI Agents', icon: Bot },
   ];
@@ -151,7 +157,6 @@ function AdminContent() {
             {currentTab === 'exercises' && <ExerciseLibrary />}
             {currentTab === 'users' && <UserManagement />}
             {currentTab === 'approvals' && <PlanApprovalQueue />}
-            {currentTab === 'templates' && <PlanTemplates />}
             {currentTab === 'analytics' && <Analytics />}
             {currentTab === 'ai_agents' && <AIAgentManagement />}
           </div>
@@ -190,7 +195,7 @@ function DashboardOverview() {
     { action: 'Plan approved', user: 'Mike Chen', time: '12 min ago' },
     { action: 'Exercise updated', user: 'Admin', time: '1 hour ago' },
     { action: 'Payment verified', user: 'Emma Wilson', time: '2 hours ago' },
-    { action: 'Template created', user: 'Admin', time: '3 hours ago' },
+    { action: 'System audit performed', user: 'Admin', time: '3 hours ago' },
   ];
 
   return (
@@ -274,15 +279,6 @@ function DashboardOverview() {
             <FileCheck className="w-8 h-8 mb-4 text-primary relative z-10" />
             <p className="text-lg font-black relative z-10 leading-tight text-foreground">AUDIT PENDING<br/>PROTOCOLS</p>
             <p className="text-xs font-bold text-muted-foreground mt-2 relative z-10">Verify AI-generated workout flows</p>
-          </button>
-
-          <button className="w-full group relative bg-card text-foreground rounded-2xl p-6 border border-border shadow-sm overflow-hidden transition-all hover:scale-[1.02] active:scale-[0.98] text-left">
-            <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-150 transition-transform duration-700">
-              <FileText className="w-24 h-24 text-primary" />
-            </div>
-            <FileText className="w-8 h-8 mb-4 text-primary relative z-10" />
-            <p className="text-lg font-black relative z-10 leading-tight text-foreground">GENERATE<br/>TEMPLATE</p>
-            <p className="text-xs font-bold text-muted-foreground mt-2 relative z-10">Standardize high-performance plans</p>
           </button>
         </div>
       </div>
