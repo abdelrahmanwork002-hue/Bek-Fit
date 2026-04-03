@@ -119,6 +119,11 @@ export function PlanApprovalQueue() {
     }
   };
 
+  const handleOverrideProtocol = () => {
+    toast.info('Overriding protocol session... Redirecting to architecture terminal.');
+    // In a real application, this would open a plan-specific exercise editor
+  };
+
   const filteredPlans = plans.filter(plan =>
     filterStatus === 'all' || plan.status === filterStatus
   );
@@ -349,7 +354,10 @@ export function PlanApprovalQueue() {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <button className="flex-1 flex items-center justify-center gap-3 px-8 py-5 bg-card border-2 border-border text-foreground/60 hover:text-foreground hover:border-primary rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all">
+                <button 
+                  onClick={handleOverrideProtocol}
+                  className="flex-1 flex items-center justify-center gap-3 px-8 py-5 bg-card border-2 border-border text-foreground/60 hover:text-foreground hover:border-primary rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all"
+                >
                   <Edit2 className="w-4 h-4" />
                   Override Protocol
                 </button>
