@@ -62,7 +62,7 @@ function AdminContent() {
     { id: 'dashboard' as View, label: 'Dashboard', icon: LayoutDashboard },
     { id: 'exercises' as View, label: 'Exercise Library', icon: Dumbbell },
     { id: 'users' as View, label: 'User Management', icon: Users },
-    { id: 'approvals' as View, label: 'Plan Approvals', icon: FileCheck },
+    { id: 'approvals' as View, label: 'Plan Management', icon: FileCheck },
     { id: 'analytics' as View, label: 'Analytics', icon: BarChart3 },
     { id: 'ai_agents' as View, label: 'AI Agents', icon: Bot },
   ];

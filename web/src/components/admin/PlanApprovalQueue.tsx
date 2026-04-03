@@ -140,7 +140,7 @@ export function PlanApprovalQueue() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-black text-foreground tracking-tight uppercase tracking-widest">PLAN APPROVAL <span className="text-primary underline decoration-primary/30 underline-offset-8">QUEUE</span></h2>
+          <h2 className="text-3xl font-black text-foreground tracking-tight uppercase tracking-widest">PLAN <span className="text-primary underline decoration-primary/30 underline-offset-8">MANAGEMENT</span></h2>
           <p className="text-muted-foreground mt-3 font-medium">Audit AI-synthesized movement protocols for safety and precision.</p>
         </div>
       </div>
