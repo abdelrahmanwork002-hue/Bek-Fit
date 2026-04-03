@@ -6,7 +6,8 @@ import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 
 interface PendingPlan {
-  id: string;
+  id: string;       // plan ID (used for approve/reject DB ops)
+  userId: string;   // user ID (used for architecture terminal routing)
   userName: string;
   userEmail: string;
   goal: string;
@@ -68,7 +69,8 @@ export function PlanApprovalQueue() {
             if (profile.pain_areas && profile.pain_areas.length > 0) flags.push("Pain management flags");
             
             return {
-              id: plan?.id || u.id, // Prefer plan ID for operations
+              id: plan?.id || u.id,   // plan ID for DB operations
+              userId: u.id,             // real user ID for routing
               userName: u.full_name || 'Unnamed User',
               userEmail: u.email || 'No Email',
               goal: goal?.title || 'General Fitness',
@@ -124,12 +126,10 @@ export function PlanApprovalQueue() {
 
   const handleOverrideProtocol = () => {
     if (!selectedPlan) return;
-    toast.info('Overriding protocol session... Redirecting to architecture terminal.');
-    
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('tab', 'architecture');
-    params.set('userId', selectedPlan.id); // In this app selectedPlan.id is often the planId or userId
-    router.push(`/admin?${params.toString()}`);
+    // Close modal first so the tab switch is visually immediate
+    setSelectedPlan(null);
+    toast.info('Redirecting to Architecture Terminal...');
+    router.push(`/admin?tab=architecture&userId=${selectedPlan.userId}&planId=${selectedPlan.id}`);
   };
 
   const filteredPlans = plans.filter(plan =>

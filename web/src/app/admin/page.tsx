@@ -35,7 +35,7 @@ function AdminContent() {
 
   // Guard against invalid tabs to prevent ghost pages
   useEffect(() => {
-    const validTabs: View[] = ['dashboard', 'exercises', 'users', 'approvals', 'analytics', 'ai_agents'];
+    const validTabs: View[] = ['dashboard', 'exercises', 'users', 'approvals', 'analytics', 'ai_agents', 'architecture'];
     if (currentTabRaw && !validTabs.includes(currentTabRaw as View)) {
       setTab('dashboard');
     }
