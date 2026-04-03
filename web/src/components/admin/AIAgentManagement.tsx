@@ -1,5 +1,6 @@
 'use client';
-import { useState, useEffect } from 'react';
+import * as React from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { 
   Plus, Search, Filter, MoreVertical, Edit2, 
   Trash2, Power, Bot, Shield, Cpu, 
@@ -9,6 +10,7 @@ import {
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 interface AIAgent {
   id: string;
@@ -23,7 +25,8 @@ interface AIAgent {
   status: 'Draft' | 'Active' | 'Inactive';
   created_at: string;
   updated_at: string;
-  roles?: string[];
+  role_names?: string[];
+  role_ids?: string[];
 }
 
 interface AIProvider {
@@ -37,7 +40,7 @@ interface AIRole {
   id: string;
   name: string;
   description: string;
-  behavior_profile?: any;
+  behavior_profile?: Record<string, unknown>;
 }
 
 export function AIAgentManagement() {
@@ -57,30 +60,27 @@ export function AIAgentManagement() {
   
   const supabase = createClient();
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  async function fetchData() {
+  const fetchData = React.useCallback(async () => {
     setLoading(true);
     try {
       const [agentsRes, providersRes, rolesRes] = await Promise.all([
         supabase.from('ai_agents').select(`
           *,
           provider:ai_providers(name),
-          roles:ai_agent_roles(role:ai_roles(name))
+          roles:ai_agent_roles(role:ai_roles(name, id))
         `).order('updated_at', { ascending: false }),
         supabase.from('ai_providers').select('*').eq('is_active', true),
         supabase.from('ai_roles').select('*')
       ]);
 
       if (agentsRes.data) {
-        const formattedAgents: AIAgent[] = agentsRes.data.map((a: any) => ({
+        const mappedData = agentsRes.data.map((a: { id: string; provider?: { name: string }; roles?: Array<{ role: { name: string; id: string } }> } & Record<string, unknown>) => ({
           ...a,
           provider_name: a.provider?.name,
-          roles: a.roles?.map((r: any) => r.role?.name) || []
-        }));
-        setAgents(formattedAgents);
+          role_names: a.roles?.map((r) => r.role?.name) || [],
+          role_ids: a.roles?.map((r) => r.role?.id) || []
+        })) as AIAgent[];
+        setAgents(mappedData);
       }
       if (providersRes.data) setProviders(providersRes.data);
       if (rolesRes.data) setRoles(rolesRes.data);
@@ -90,7 +90,11 @@ export function AIAgentManagement() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [supabase]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const filteredAgents = agents.filter(agent => {
     const matchesSearch = agent.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -284,7 +288,7 @@ export function AIAgentManagement() {
                   </div>
 
                   <div className="flex flex-wrap gap-2 mb-8">
-                    {agent.roles?.map((role, idx) => (
+                    {agent.role_names?.map((role, idx) => (
                       <span key={idx} className="px-3 py-1 bg-secondary text-foreground/60 rounded-lg text-[8px] font-black uppercase tracking-widest border border-border/50">
                         {role}
                       </span>
@@ -363,13 +367,13 @@ export function AIAgentManagement() {
       )}
 
       {/* Modals */}
-      {isModalOpen && <AgentFormModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} agent={editingAgent} providers={providers} roles={roles} onSuccess={fetchData} supabase={supabase} />}
-      {isProviderModalOpen && <ProviderFormModal isOpen={isProviderModalOpen} onClose={() => setIsProviderModalOpen(false)} provider={editingProvider} onSuccess={fetchData} supabase={supabase} />}
+      {isModalOpen && <AgentFormModal onClose={() => setIsModalOpen(false)} agent={editingAgent} providers={providers} roles={roles} onSuccess={fetchData} supabase={supabase} />}
+      {isProviderModalOpen && <ProviderFormModal onClose={() => setIsProviderModalOpen(false)} provider={editingProvider} onSuccess={fetchData} supabase={supabase} />}
     </div>
   );
 }
 
-function ProviderFormModal({ isOpen, onClose, provider, onSuccess, supabase }: { isOpen: boolean, onClose: () => void, provider: AIProvider | null, onSuccess: () => void, supabase: any }) {
+function ProviderFormModal({ onClose, provider, onSuccess, supabase }: { onClose: () => void, provider: AIProvider | null, onSuccess: () => void, supabase: SupabaseClient }) {
    const [loading, setLoading] = useState(false);
    const [name, setName] = useState(provider?.name || '');
 
@@ -387,8 +391,9 @@ function ProviderFormModal({ isOpen, onClose, provider, onSuccess, supabase }: {
          toast.success("Registry module updated.");
          onSuccess();
          onClose();
-      } catch (err: any) {
-         toast.error(`Protocol failure: ${err.message}`);
+      } catch (err: unknown) {
+         const message = err instanceof Error ? err.message : 'Unknown error';
+         toast.error(`Protocol failure: ${message}`);
       } finally {
          setLoading(false);
       }
@@ -417,9 +422,9 @@ function ProviderFormModal({ isOpen, onClose, provider, onSuccess, supabase }: {
 }
 
 function AgentFormModal({ 
-  isOpen, onClose, agent, providers, roles, onSuccess, supabase 
+  onClose, agent, providers, roles, onSuccess, supabase 
 }: { 
-  isOpen: boolean, onClose: () => void, agent: AIAgent | null, providers: AIProvider[], roles: AIRole[], onSuccess: () => void, supabase: any 
+  onClose: () => void, agent: AIAgent | null, providers: AIProvider[], roles: AIRole[], onSuccess: () => void, supabase: SupabaseClient 
 }) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -430,8 +435,17 @@ function AgentFormModal({
     system_prompt: agent?.system_prompt || '',
     temperature: agent?.temperature || 0.7,
     max_tokens: agent?.max_tokens || 1024,
-    assigned_roles: agent?.roles || []
+    assigned_role_ids: agent?.role_ids || [] as string[]
   });
+
+  const toggleRole = (roleId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      assigned_role_ids: prev.assigned_role_ids.includes(roleId)
+        ? prev.assigned_role_ids.filter(id => id !== roleId)
+        : [...prev.assigned_role_ids, roleId]
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -461,14 +475,33 @@ function AgentFormModal({
         agentId = data[0].id;
       }
 
-      // Sync Roles (Mental simplification for MVP: replace all with new set)
-      // In a real app, you'd use a junction table properly
+      if (agentId) {
+        // Clear existing role mappings
+        const { error: relDeleteError } = await supabase
+          .from('ai_agent_roles')
+          .delete()
+          .eq('agent_id', agentId);
+        if (relDeleteError) throw relDeleteError;
+
+        // Insert new role mappings
+        if (formData.assigned_role_ids.length > 0) {
+          const roleMappings = formData.assigned_role_ids.map(roleId => ({
+            agent_id: agentId,
+            role_id: roleId
+          }));
+          const { error: relInsertError } = await supabase
+            .from('ai_agent_roles')
+            .insert(roleMappings);
+          if (relInsertError) throw relInsertError;
+        }
+      }
       
       toast.success(agent ? 'Agent protocol updated.' : 'Intelligence module initialized.');
       onSuccess();
       onClose();
-    } catch (error: any) {
-      toast.error(`Sync Failure: ${error.message || 'Unknown protocol error.'}`);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown protocol error.';
+      toast.error(`Sync Failure: ${message}`);
     } finally {
       setLoading(false);
     }
@@ -559,6 +592,26 @@ function AgentFormModal({
                 className="w-full px-4 py-3 bg-secondary/50 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-bold"
               />
             </div>
+          </div>
+
+          <div className="space-y-4">
+             <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Assigned Operational Roles</label>
+             <div className="flex flex-wrap gap-3">
+                {roles.map(role => (
+                   <button
+                      key={role.id}
+                      type="button"
+                      onClick={() => toggleRole(role.id)}
+                      className={`px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider border transition-all ${
+                         formData.assigned_role_ids.includes(role.id)
+                            ? 'bg-primary/10 border-primary text-primary shadow-inner'
+                            : 'bg-secondary/30 border-border text-muted-foreground hover:border-primary/50'
+                      }`}
+                   >
+                      {role.name}
+                   </button>
+                ))}
+             </div>
           </div>
 
           <div className="flex gap-4 pt-6">

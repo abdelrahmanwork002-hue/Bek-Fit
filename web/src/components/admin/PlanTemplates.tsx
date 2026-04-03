@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 interface Exercise {
   id: string;
@@ -58,31 +59,42 @@ export function PlanTemplates() {
 
   async function fetchTemplates() {
     setLoading(true);
-    // Note: This would typically fetch from plan_templates table
-    // For now, initializing with a simulation of the new schema
-    const { data: goals } = await supabase.from('goals').select('*');
-    
-    // Simulating database fetch
-    setTemplates([
-      {
-        id: '1',
-        name: 'Acute Neck Pain Relief',
-        goal: 'Pain Management',
-        difficulty: 'Beginner',
-        duration: '4 weeks',
-        equipment: ['None'],
-        description: 'Gentle mobility and strengthening exercises for acute neck pain',
-        workouts_per_week: 3,
-        status: 'active',
-        usage_count: 24,
-        last_modified: '2026-03-20',
-        exercises: [
-          { exercise_id: 'ex1', name: 'Neck Isometrics', sets: 3, reps: '10s hold', rest_seconds: 30, order_index: 0 },
-          { exercise_id: 'ex2', name: 'Chin Tucks', sets: 3, reps: '12', rest_seconds: 45, order_index: 1 }
-        ]
+    try {
+      const { data, error } = await supabase
+        .from('plan_templates')
+        .select(`
+          *,
+          exercises:template_exercises(
+            exercise_id,
+            sets,
+            reps,
+            rest_seconds,
+            order_index,
+            exercises(title)
+          )
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      if (data) {
+        setTemplates(data.map((t: any) => ({
+          ...t,
+          exercises: t.exercises.map((te: any) => ({
+            exercise_id: te.exercise_id,
+            name: te.exercises.title,
+            sets: te.sets,
+            reps: te.reps,
+            rest_seconds: te.rest_seconds,
+            order_index: te.order_index
+          }))
+        })));
       }
-    ]);
-    setLoading(false);
+    } catch (err: any) {
+      toast.error(`Sync Failure: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
   }
 
   const filteredTemplates = templates.filter(t => {
@@ -194,7 +206,15 @@ export function PlanTemplates() {
   );
 }
 
-function PlanTemplateModal({ isOpen, onClose, template, onSuccess, supabase }: any) {
+interface PlanTemplateModalProps {
+   isOpen: boolean;
+   onClose: () => void;
+   template: Template | null;
+   onSuccess: () => void;
+   supabase: SupabaseClient;
+}
+
+function PlanTemplateModal({ isOpen, onClose, template, onSuccess, supabase }: PlanTemplateModalProps) {
    const [saving, setSaving] = useState(false);
    const [exercises, setExercises] = useState<Exercise[]>([]);
    const [formData, setFormData] = useState({
@@ -210,7 +230,7 @@ function PlanTemplateModal({ isOpen, onClose, template, onSuccess, supabase }: a
    useEffect(() => {
      async function fetchExercises() {
        const { data } = await supabase.from('exercises').select('*').eq('status', 'Active');
-       if (data) setExercises(data.map((ex: any) => ({
+       if (data) setExercises(data.map((ex: { id: string; title: string; category?: string; body_area?: string; default_sets?: number; default_reps?: number; duration_seconds?: number }) => ({
           id: ex.id,
           name: ex.title,
           category: ex.category || 'Gym',
@@ -218,7 +238,7 @@ function PlanTemplateModal({ isOpen, onClose, template, onSuccess, supabase }: a
           default_sets: ex.default_sets,
           default_reps: ex.default_reps,
           duration_seconds: ex.duration_seconds
-       })));
+       } as Exercise)));
      }
      fetchExercises();
    }, []);
@@ -243,14 +263,14 @@ function PlanTemplateModal({ isOpen, onClose, template, onSuccess, supabase }: a
    const removeExercise = (index: number) => {
       setFormData(prev => ({
          ...prev,
-         exercises: prev.exercises.filter((_: any, i: number) => i !== index)
+         exercises: prev.exercises.filter((_, i: number) => i !== index)
       }));
    };
 
    const updateExerciseVolume = (index: number, key: string, value: any) => {
       setFormData(prev => ({
          ...prev,
-         exercises: prev.exercises.map((ex: any, i: number) => 
+         exercises: prev.exercises.map((ex: PlanExercise, i: number) => 
             i === index ? { ...ex, [key]: value } : ex
          )
       }));
@@ -260,12 +280,64 @@ function PlanTemplateModal({ isOpen, onClose, template, onSuccess, supabase }: a
       e.preventDefault();
       setSaving(true);
       try {
-         // Logic to save template and junction exercises
+         const planData = {
+            name: formData.name,
+            description: formData.description,
+            goal: formData.goal,
+            difficulty: formData.difficulty,
+            duration_weeks: parseInt(formData.duration_weeks),
+            workouts_per_week: formData.workouts_per_week,
+            status: 'active'
+         };
+
+         let templateId = template?.id;
+
+         if (templateId) {
+            // Update
+            const { error: updateError } = await supabase
+               .from('plan_templates')
+               .update(planData)
+               .eq('id', templateId);
+            if (updateError) throw updateError;
+
+            // Clear old exercises
+            const { error: deleteError } = await supabase
+               .from('template_exercises')
+               .delete()
+               .eq('template_id', templateId);
+            if (deleteError) throw deleteError;
+         } else {
+            // Insert
+            const { data, error: insertError } = await supabase
+               .from('plan_templates')
+               .insert([planData])
+               .select()
+               .single();
+            if (insertError) throw insertError;
+            templateId = data.id;
+         }
+
+         // Insert exercises
+         const exerciseData = formData.exercises.map((ex: PlanExercise, idx: number) => ({
+            template_id: templateId,
+            exercise_id: ex.exercise_id,
+            sets: ex.sets,
+            reps: ex.reps,
+            rest_seconds: ex.rest_seconds,
+            order_index: idx
+         }));
+
+         const { error: junctionError } = await supabase
+            .from('template_exercises')
+            .insert(exerciseData);
+         if (junctionError) throw junctionError;
+
          toast.success("Protocol Template Committed to Core Memory.");
          onSuccess();
          onClose();
-      } catch (err: any) {
-         toast.error(`Architecture Failure: ${err.message}`);
+      } catch (err: unknown) {
+         const message = err instanceof Error ? err.message : 'Unknown error';
+         toast.error(`Architecture Failure: ${message}`);
       } finally {
          setSaving(false);
       }
@@ -353,7 +425,7 @@ function PlanTemplateModal({ isOpen, onClose, template, onSuccess, supabase }: a
                            <div className="mt-4 pt-4 border-t border-border/50">
                               <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-3 px-2">Library Ingress</p>
                               <div className="max-h-[200px] overflow-y-auto space-y-2 pr-2">
-                                 {exercises.map(ex => (
+                                 {exercises.map((ex: Exercise) => (
                                     <button key={ex.id} type="button" onClick={() => addExercise(ex)} className="w-full flex items-center justify-between p-3 bg-card hover:bg-primary/10 border border-border rounded-xl transition-all group">
                                        <span className="text-[10px] font-black uppercase text-foreground group-hover:text-primary">{ex.name}</span>
                                        <Plus className="w-3 h-3 text-primary opacity-0 group-hover:opacity-100" />

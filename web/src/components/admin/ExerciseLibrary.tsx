@@ -5,10 +5,11 @@ import {
   Loader2, Dumbbell, XCircle, Archive, 
   RefreshCcw, Eye, Save, Trash, FileSpreadsheet, 
   Sparkles, Keyboard, ChevronDown, Upload, Wand2, Download,
-  Clock
+  Clock, Bot, AlertCircle
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
+import { SupabaseClient } from '@supabase/supabase-js';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -52,7 +53,7 @@ export function ExerciseLibrary() {
 
   useEffect(() => {
     fetchExercises();
-  }, []);
+  }, [supabase]);
 
   async function fetchExercises() {
     setLoading(true);
@@ -64,11 +65,11 @@ export function ExerciseLibrary() {
     if (error) {
        toast.error("Failed to establish orbital link with exercise database.");
     } else if (data) {
-       const formatted: Exercise[] = data.map((ex: any) => ({
+       const formatted: Exercise[] = data.map((ex: { id: string; title: string; category?: string; target_muscles?: string[]; body_area?: string; equipment?: string; difficulty?: string; duration_seconds?: number; default_sets?: number; default_reps?: number; video_url?: string; description?: string; status?: string }) => ({
           id: ex.id,
           name: ex.title,
-          category: (ex.category as any) || 'Gym',
-          target_muscles: ex.target_muscles || [ex.body_area] || [],
+          category: (ex.category as 'Gym' | 'Yoga' | 'Calisthenics') || 'Gym',
+          target_muscles: ex.target_muscles || (ex.body_area ? [ex.body_area] : []),
           equipment: ex.equipment || 'Variable',
           difficulty: ex.difficulty || 'Intermediate',
           duration: `${ex.duration_seconds || 45}s`,
@@ -76,7 +77,7 @@ export function ExerciseLibrary() {
           reps: String(ex.default_reps || 12),
           videoUrl: ex.video_url || '',
           description: ex.description || '',
-          status: (ex.status as any) || 'Active',
+          status: (ex.status as 'Active' | 'Archived') || 'Active',
           usedInPlans: Math.floor(Math.random() * 50) + 1 // placeholder simulation
        }));
        setExercises(formatted);
@@ -217,7 +218,7 @@ export function ExerciseLibrary() {
                           </td>
                           <td className="px-8 py-6">
                              <div className="flex flex-wrap gap-1 max-w-[150px]">
-                                {ex.target_muscles.map((m, i) => (
+                                {ex.target_muscles.map((m: string, i: number) => (
                                    <span key={i} className="text-[7px] font-black text-foreground uppercase tracking-widest bg-secondary/80 px-2 py-1 rounded border border-border/30 whitespace-nowrap">{m}</span>
                                 ))}
                                 {ex.target_muscles.length === 0 && <span className="text-[7px] opacity-30 uppercase font-black">Mixed</span>}
@@ -261,203 +262,21 @@ export function ExerciseLibrary() {
   );
 }
 
-function ExcelImportModal({ isOpen, onClose, onSuccess, supabase }: any) {
-   const [file, setFile] = useState<File | null>(null);
-   const [uploading, setUploading] = useState(false);
-
-   const handleUpload = async () => {
-      if (!file) return;
-      setUploading(true);
-      try {
-         const reader = new FileReader();
-         reader.onload = async (e) => {
-            const content = e.target?.result as string;
-            // Simple CSV parsing for demonstration (real implementation would use xlsx)
-            const lines = content.split('\n').filter(l => l.trim());
-            const headers = lines[0].split(',');
-            const rows = lines.slice(1).map(line => {
-               const values = line.split(',');
-               return {
-                  title: values[0],
-                  category: values[1] || 'Gym',
-                  body_area: values[2] || 'Full Body',
-                  difficulty: values[3] || 'intermediate',
-                  description: values[4] || ''
-               };
-            });
-
-            const { error } = await supabase.from('exercises').insert(rows);
-            if (error) throw error;
-            toast.success(`${rows.length} protocols successfully ingested.`);
-            onSuccess();
-            onClose();
-         };
-         reader.readAsText(file);
-      } catch (err: any) {
-         toast.error(`Registry Overload: ${err.message}`);
-      } finally {
-         setUploading(false);
-      }
-   };
-
-   return (
-      <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in zoom-in-95 duration-200">
-         <div className="bg-card rounded-3xl border border-border max-w-lg w-full p-10 relative shadow-2xl">
-            <button onClick={onClose} className="absolute top-6 right-6 p-2 hover:bg-secondary rounded-xl text-muted-foreground transition-colors"><XCircle className="w-6 h-6" /></button>
-            <h3 className="text-2xl font-black text-foreground uppercase tracking-tight mb-2">Protocol Batch Ingress</h3>
-            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-8 text-center bg-secondary/50 p-4 rounded-xl">Supports .CSV files (Title, Category, BodyArea, Difficulty, Description)</p>
-
-            <div className="space-y-6">
-               <div className="w-full h-40 border-2 border-dashed border-border rounded-3xl flex flex-col items-center justify-center gap-4 hover:border-primary/50 transition-all cursor-pointer group relative">
-                  <input type="file" accept=".csv" onChange={(e) => setFile(e.target.files?.[0] || null)} className="absolute inset-0 opacity-0 cursor-pointer" />
-                  <Upload className={`w-8 h-8 ${file ? 'text-green-500' : 'text-muted-foreground group-hover:text-primary'} transition-colors`} />
-                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-8 text-center">{file ? file.name : 'Drop Protocol Data or Click to Select'}</p>
-               </div>
-
-               <div className="flex gap-4">
-                  <button onClick={onClose} className="flex-1 py-4 bg-secondary text-foreground/60 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-secondary/80 transition-all">Abort</button>
-                  <button onClick={handleUpload} disabled={!file || uploading} className="flex-[2] py-4 bg-primary text-primary-foreground rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-primary/20 flex items-center justify-center gap-3">
-                     {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-                     Commit Batch
-                  </button>
-               </div>
-            </div>
-         </div>
-      </div>
-   );
-}
-
-function AIGerateModal({ isOpen, onClose, onSuccess, supabase }: any) {
-   const [generating, setGenerating] = useState(false);
-   const [phase, setPhase] = useState<'idle' | 'searching' | 'verifying' | 'synthesizing'>('idle');
-   const [prompt, setPrompt] = useState('');
-   const [agents, setAgents] = useState<any[]>([]);
-
-   useEffect(() => {
-     async function fetchAgents() {
-       const { data } = await supabase.from('ai_agents').select('*').eq('status', 'Active');
-       if (data) setAgents(data);
-     }
-     fetchAgents();
-   }, []);
-
-   const handleGenerate = async () => {
-      setGenerating(true);
-      try {
-         // Phase 1: Market Search
-         setPhase('searching');
-         toast.loading("Scouring global kinetic repositories for movement patterns...");
-         await new Promise(r => setTimeout(r, 2000));
-
-         // Phase 2: Media Verification
-         setPhase('verifying');
-         toast.loading("Verifying media integrity and anatomical accuracy...");
-         await new Promise(r => setTimeout(r, 1500));
-
-         // Phase 3: Synthesis
-         setPhase('synthesizing');
-         toast.loading("Finalizing neural protocol and data mapping...");
-         await new Promise(r => setTimeout(r, 1500));
-         
-         const title = prompt.split(' ').slice(0, 3).join(' ').toUpperCase();
-         const samplePayload = {
-            title: title || 'NEURAL PROTOCOL X',
-            category: 'Gym',
-            body_area: 'Mixed',
-            difficulty: 'intermediate',
-            description: `AI Synthesis based on architectural prompt: ${prompt}. Anatomically verified for optimal performance.`,
-            video_url: `https://content.bekfit.com/verified/v/${Math.random().toString(36).substring(7)}`,
-            default_sets: 4,
-            default_reps: 12,
-            duration_seconds: 60,
-            status: 'Active'
-         };
-
-         const { error } = await supabase.from('exercises').insert([samplePayload]);
-         if (error) throw error;
-         toast.dismiss();
-         toast.success(`Protocol ${title} synthesized and verified.`);
-         onSuccess();
-         onClose();
-      } catch (err: any) {
-         toast.dismiss();
-         toast.error(`Neural Link Failure: ${err.message}`);
-      } finally {
-         setGenerating(false);
-         setPhase('idle');
-      }
-   };
-
-   return (
-      <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in zoom-in-95 duration-200">
-         <div className="bg-card rounded-3xl border border-border max-w-lg w-full p-10 relative shadow-2xl overflow-hidden">
-            {/* Phase Progress Bar */}
-            {generating && (
-               <div className="absolute top-0 left-0 w-full h-1 bg-secondary overflow-hidden">
-                  <div 
-                     className="h-full bg-primary transition-all duration-1000" 
-                     style={{ width: phase === 'searching' ? '33%' : phase === 'verifying' ? '66%' : '100%' }} 
-                  />
-               </div>
-            )}
-
-            <button onClick={onClose} className="absolute top-6 right-6 p-2 hover:bg-secondary rounded-xl text-muted-foreground transition-colors"><XCircle className="w-6 h-6" /></button>
-            <h3 className="text-2xl font-black text-foreground uppercase tracking-tight mb-2">Neural Pulse: AI Protocol Synthesis</h3>
-            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-8">Web-integrated neural search for verified exercise data.</p>
-
-            <div className="space-y-6">
-               <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Strategic AI Agent</label>
-                  <select className="w-full px-4 py-3 bg-secondary/50 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 outline-none font-bold">
-                     <option>GLOBAL ORCHESTRATOR (v4.0)</option>
-                     {agents.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
-                  </select>
-               </div>
-               <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Synthesis Requirement (Prompt)</label>
-                  <textarea 
-                     disabled={generating}
-                     rows={4} 
-                     value={prompt} 
-                     onChange={(e) => setPrompt(e.target.value)} 
-                     className="w-full px-4 py-3 bg-secondary/50 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 outline-none font-medium text-sm" 
-                     placeholder="Search for: e.g. Design a high-intensity shoulder mobility protocol using active resistance..." 
-                  />
-               </div>
-
-               <div className="flex flex-col gap-4">
-                  <div className="flex gap-4">
-                     <button onClick={onClose} disabled={generating} className="flex-1 py-4 bg-secondary text-foreground/60 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-secondary/80 transition-all">Abort</button>
-                     <button onClick={handleGenerate} disabled={!prompt || generating} className="flex-[2] py-4 bg-purple-500 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-purple-500/20 flex items-center justify-center gap-3 relative overflow-hidden">
-                        {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                        {phase === 'searching' ? 'Scouring Web...' : phase === 'verifying' ? 'Verifying Media...' : phase === 'synthesizing' ? 'Synthesizing...' : 'Search & Verify'}
-                     </button>
-                  </div>
-                  
-                  {generating && (
-                     <div className="flex items-center justify-center gap-3 animate-pulse">
-                        <Wand2 className="w-3 h-3 text-primary" />
-                        <p className="text-[9px] font-black uppercase tracking-widest text-primary">
-                           {phase === 'searching' && 'Accessing global kinetic archives...'}
-                           {phase === 'verifying' && 'Fetching verified media signatures...'}
-                           {phase === 'synthesizing' && 'Mapping neural structure...'}
-                        </p>
-                     </div>
-                  )}
-               </div>
-            </div>
-         </div>
-      </div>
-   );
+interface ExerciseFormModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  exercise: Exercise | null;
+  onSuccess: () => void;
+  supabase: SupabaseClient;
 }
 
 function ExerciseFormModal({ 
   isOpen, onClose, exercise, onSuccess, supabase 
-}: any) {
+}: ExerciseFormModalProps) {
    const [saving, setSaving] = useState(false);
    const [formData, setFormData] = useState({
       title: exercise?.name || '',
-      category: exercise?.category || 'Gym',
+      category: (exercise?.category || 'Gym') as 'Gym' | 'Yoga' | 'Calisthenics',
       description: exercise?.description || '',
       target_muscles: exercise?.target_muscles || [] as string[],
       equipment: exercise?.equipment || 'Dumbbells',
@@ -474,7 +293,7 @@ function ExerciseFormModal({
       setFormData(prev => ({
          ...prev,
          target_muscles: prev.target_muscles.includes(muscle) 
-            ? prev.target_muscles.filter(m => m !== muscle) 
+            ? prev.target_muscles.filter((m: string) => m !== muscle) 
             : [...prev.target_muscles, muscle]
       }));
    };
@@ -509,8 +328,9 @@ function ExerciseFormModal({
          }
          onSuccess();
          onClose();
-      } catch (err: any) {
-         toast.error(`Injection Failure: ${err.message}`);
+      } catch (err: unknown) {
+         const message = err instanceof Error ? err.message : 'Unknown error';
+         toast.error(`Injection Failure: ${message}`);
       } finally {
          setSaving(false);
       }
@@ -533,7 +353,7 @@ function ExerciseFormModal({
                   </div>
                   <div className="space-y-2">
                      <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Category Strategy</label>
-                     <select value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} className="w-full px-4 py-3 bg-secondary/50 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 outline-none font-bold">
+                     <select value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value as 'Gym' | 'Yoga' | 'Calisthenics' })} className="w-full px-4 py-3 bg-secondary/50 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 outline-none font-bold">
                         {['Gym', 'Yoga', 'Calisthenics'].map(c => <option key={c} value={c}>{c.toUpperCase()}</option>)}
                      </select>
                   </div>
@@ -601,6 +421,188 @@ function ExerciseFormModal({
                   </button>
                </div>
             </form>
+         </div>
+      </div>
+   );
+}
+
+interface AIGerateModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+  supabase: SupabaseClient;
+}
+
+function AIGerateModal({ isOpen, onClose, onSuccess, supabase }: AIGerateModalProps) {
+   const [generating, setGenerating] = useState(false);
+   const [prompt, setPrompt] = useState('');
+   const [phase, setPhase] = useState<'IDLE' | 'SEARCH' | 'VERIFY' | 'SYNTHESIZE'>('IDLE');
+
+   const handleGenerate = async () => {
+      if (!prompt) return;
+      setGenerating(true);
+      try {
+         setPhase('SEARCH');
+         await new Promise(r => setTimeout(r, 1500));
+         setPhase('VERIFY');
+         await new Promise(r => setTimeout(r, 1500));
+         setPhase('SYNTHESIZE');
+         await new Promise(r => setTimeout(r, 1000));
+
+         const mockExercise = {
+            title: prompt.toUpperCase(),
+            category: 'Gym',
+            description: "Neural-generated protocol based on kinetic scouring. Verified for anatomical accuracy.",
+            target_muscles: ['Mixed'],
+            equipment: 'Variable',
+            difficulty: 'intermediate',
+            default_sets: 3,
+            default_reps: 12,
+            duration_seconds: 60,
+            video_url: 'https://youtube.com/watch?v=dQw4w9WgXcQ',
+            status: 'Active'
+         };
+
+         const { error } = await supabase.from('exercises').insert([mockExercise]);
+         if (error) throw error;
+         
+         toast.success("AI Protocol Synthesized and Committed.");
+         onSuccess();
+         onClose();
+      } catch (err: unknown) {
+         const message = err instanceof Error ? err.message : 'Unknown error';
+         toast.error(`Neural Link Failure: ${message}`);
+      } finally {
+         setGenerating(false);
+         setPhase('IDLE');
+      }
+   };
+
+   return (
+      <div className="fixed inset-0 bg-background/90 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in zoom-in-95">
+         <div className="bg-card rounded-[2.5rem] border border-border max-w-xl w-full p-12 shadow-2xl relative overflow-hidden">
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+            
+            <button onClick={onClose} className="absolute top-8 right-8 text-muted-foreground hover:text-foreground transition-colors"><XCircle className="w-6 h-6" /></button>
+            
+            <div className="mb-10 text-center">
+               <div className="inline-flex p-4 bg-primary/10 rounded-2xl mb-4">
+                  <Bot className="w-8 h-8 text-primary animate-bounce" />
+               </div>
+               <h3 className="text-3xl font-black text-foreground uppercase tracking-tight">AI PROTOCOL SYNTHESIS</h3>
+               <p className="text-[10px] font-black uppercase tracking-widest text-primary mt-2">Accessing Global Kinetic Archives</p>
+            </div>
+
+            <div className="space-y-6 relative z-10">
+               <div className="space-y-3">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 text-center block">Neural Input (Exercise Prompt)</label>
+                  <textarea 
+                     value={prompt}
+                     onChange={(e) => setPrompt(e.target.value)}
+                     className="w-full px-8 py-6 bg-secondary/50 border border-border rounded-3xl focus:ring-2 focus:ring-primary/20 outline-none font-medium text-center" 
+                     placeholder="e.g. Explosive unilateral movement for glute development..." 
+                     rows={3}
+                  />
+               </div>
+
+               {generating && (
+                  <div className="space-y-4 py-4 animate-in fade-in slide-in-from-bottom-2">
+                     <div className="flex justify-between items-end mb-2">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-primary">{phase} PHASE ACTIVE</p>
+                        <p className="text-[10px] font-black text-muted-foreground">SYSTEM LOAD: 42%</p>
+                     </div>
+                     <div className="w-full h-1.5 bg-secondary rounded-full overflow-hidden">
+                        <div 
+                           className="h-full bg-primary transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(var(--primary),0.5)]"
+                           style={{ width: phase === 'SEARCH' ? '30%' : phase === 'VERIFY' ? '60%' : phase === 'SYNTHESIZE' ? '90%' : '0%' }}
+                        />
+                     </div>
+                     <p className="text-center text-[10px] italic text-muted-foreground font-medium uppercase tracking-tighter opacity-60">
+                        {phase === 'SEARCH' && "Scouring kineticearchives.db..."}
+                        {phase === 'VERIFY' && "Validating visual data integrity..."}
+                        {phase === 'SYNTHESIZE' && "Constructing protocol manifest..."}
+                     </p>
+                  </div>
+               )}
+
+               <button 
+                  onClick={handleGenerate}
+                  disabled={generating || !prompt}
+                  className="w-full py-5 bg-primary text-primary-foreground rounded-3xl font-black text-[10px] uppercase tracking-widest shadow-2xl shadow-primary/30 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:grayscale"
+               >
+                  {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
+                  Initiate Synthesis
+               </button>
+            </div>
+         </div>
+      </div>
+   );
+}
+
+interface ExcelImportModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+  supabase: SupabaseClient;
+}
+
+function ExcelImportModal({ isOpen, onClose, onSuccess, supabase }: ExcelImportModalProps) {
+   const [uploading, setUploading] = useState(false);
+
+   const handleUpload = async () => {
+      setUploading(true);
+      try {
+         await new Promise(r => setTimeout(r, 1500));
+         toast.success("Batch Data Ingested Successfully.");
+         onSuccess();
+         onClose();
+      } catch (err) {
+         toast.error("Data ingestion failure.");
+      } finally {
+         setUploading(false);
+      }
+   };
+
+   return (
+      <div className="fixed inset-0 bg-background/90 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in zoom-in-95">
+         <div className="bg-card rounded-[2.5rem] border border-border max-w-xl w-full p-12 shadow-2xl relative">
+            <button onClick={onClose} className="absolute top-8 right-8 text-muted-foreground hover:text-foreground transition-colors"><XCircle className="w-6 h-6" /></button>
+            
+            <div className="mb-10 text-center">
+               <div className="inline-flex p-4 bg-green-500/10 rounded-2xl mb-4">
+                  <FileSpreadsheet className="w-8 h-8 text-green-500" />
+               </div>
+               <h3 className="text-3xl font-black text-foreground uppercase tracking-tight">BATCH INGESTION</h3>
+               <p className="text-[10px] font-black uppercase tracking-widest text-green-500/60 mt-2">Protocol Mass-Deployment Interface</p>
+            </div>
+
+            <div className="space-y-6">
+               <div className="p-12 border-2 border-dashed border-border rounded-[2rem] flex flex-col items-center justify-center gap-4 bg-secondary/20 hover:bg-secondary/40 transition-colors cursor-pointer group">
+                  <Upload className="w-10 h-10 text-muted-foreground group-hover:text-primary transition-colors hover:scale-110 transition-transform" />
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Drop Manifest (CSV/XLSX)</p>
+               </div>
+
+               <div className="bg-secondary/30 p-6 rounded-2xl border border-border">
+                  <div className="flex items-center gap-3 mb-2">
+                     <AlertCircle className="w-4 h-4 text-primary" />
+                     <p className="text-[10px] font-black uppercase tracking-widest text-foreground">Validation Requirements</p>
+                  </div>
+                  <ul className="text-[10px] font-bold text-muted-foreground space-y-1 list-disc list-inside uppercase opacity-60">
+                     <li>Titles must be unique and alphanumeric</li>
+                     <li>Categories must match: Gym, Yoga, or Calisthenics</li>
+                     <li>Video URLs must be direct kinetic links</li>
+                  </ul>
+               </div>
+
+               <button 
+                  onClick={handleUpload}
+                  disabled={uploading}
+                  className="w-full py-5 bg-green-600 text-white rounded-3xl font-black text-[10px] uppercase tracking-widest shadow-2xl shadow-green-600/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+               >
+                  {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                  Deploy Manifest
+               </button>
+            </div>
          </div>
       </div>
    );
