@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { Search, Eye, CheckCircle, XCircle, Clock, Loader2, Users, FileCheck } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 
@@ -27,6 +28,8 @@ export function UserManagement() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     async function fetchUsers() {
@@ -119,8 +122,13 @@ export function UserManagement() {
   };
 
   const handleOverrideProgram = () => {
+    if (!selectedUser) return;
     toast.info('Overriding protocol session... Redirecting to architecture terminal.');
-    // In a real app, this would probably navigate to the exercise library with the user's ID
+    
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('tab', 'architecture');
+    params.set('userId', selectedUser.id);
+    router.push(`/admin?${params.toString()}`);
   };
 
   const filteredUsers = users.filter((user) => {

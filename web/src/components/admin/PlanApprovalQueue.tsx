@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { Eye, CheckCircle, XCircle, AlertTriangle, Edit2, Loader2, Calendar, Activity, Zap } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 
@@ -26,6 +27,8 @@ export function PlanApprovalQueue() {
   const [plans, setPlans] = useState<PendingPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     async function fetchQueue() {
@@ -120,8 +123,13 @@ export function PlanApprovalQueue() {
   };
 
   const handleOverrideProtocol = () => {
+    if (!selectedPlan) return;
     toast.info('Overriding protocol session... Redirecting to architecture terminal.');
-    // In a real application, this would open a plan-specific exercise editor
+    
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('tab', 'architecture');
+    params.set('userId', selectedPlan.id); // In this app selectedPlan.id is often the planId or userId
+    router.push(`/admin?${params.toString()}`);
   };
 
   const filteredPlans = plans.filter(plan =>

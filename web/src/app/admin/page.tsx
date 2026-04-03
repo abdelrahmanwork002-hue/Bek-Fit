@@ -8,6 +8,7 @@ import { UserManagement } from '@/components/admin/UserManagement';
 import { PlanApprovalQueue } from '@/components/admin/PlanApprovalQueue';
 import { Analytics } from '@/components/admin/Analytics';
 import { AIAgentManagement } from '@/components/admin/AIAgentManagement';
+import { ArchitectureTerminal } from '@/components/admin/ArchitectureTerminal';
 import {
   LayoutDashboard,
   Dumbbell,
@@ -21,7 +22,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 
-type View = 'dashboard' | 'exercises' | 'users' | 'approvals' | 'analytics' | 'ai_agents';
+type View = 'dashboard' | 'exercises' | 'users' | 'approvals' | 'analytics' | 'ai_agents' | 'architecture';
 
 function AdminContent() {
   const router = useRouter();
@@ -159,6 +160,7 @@ function AdminContent() {
             {currentTab === 'approvals' && <PlanApprovalQueue />}
             {currentTab === 'analytics' && <Analytics />}
             {currentTab === 'ai_agents' && <AIAgentManagement />}
+            {currentTab === 'architecture' && <ArchitectureTerminal />}
           </div>
         </main>
       </div>
